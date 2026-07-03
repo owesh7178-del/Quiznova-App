@@ -1,0 +1,24 @@
+name: Build APK
+
+on:
+  workflow_dispatch: # इससे आपको जब चाहें बटन दबाकर APK बनाने का विकल्प मिलेगा
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Buildozer Action
+        uses: ArtemGovorov/buildozer-action@v1
+        with:
+          command: buildozer android debug
+          repository_root: .
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Quiznova-APK
+          path: ./.buildozer/android/platform/build/outputs/apk/debug/*.apk
