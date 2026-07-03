@@ -5,25 +5,25 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04 # लेटेस्ट स्टेबल लिनक्स सर्वर
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # अपडेटेड v4
+        uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-python-version: '3.11'
+          python-version: '3.11' # यहाँ टाइपो को ठीक कर दिया गया है
 
       - name: Buildozer Action
-        uses: Subspace02/buildozer-action@v2 # लेटेस्ट चालू बिल्डोजर एक्शन
+        uses: Subspace02/buildozer-action@v2
         with:
           command: buildozer android debug
           repository_root: .
 
       - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4 # अपडेटेड v4 (जिसकी वजह से एरर आ रहा था)
+        uses: actions/upload-artifact@v4
         with:
           name: Quiznova-APK
           path: ./.buildozer/android/platform/build/outputs/apk/debug/*.apk
