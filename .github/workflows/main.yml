@@ -22,12 +22,16 @@ jobs:
           sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev tk-dev libgdbm-compat-dev libreoffice-dev libcups2-dev
           pip3 install --user --upgrade buildozer cython virtualenv
 
-      - name: Automatically Accept Android Licenses & Build
+      - name: Build APK Clean Run
         run: |
           export PATH=$PATH:~/.local/bin
-          # यह कमांड ऑटोमैटिकली सारे लाइसेंस को 'Yes' कर देगी, जिससे एरर नहीं आएगा
-          mkdir -p ~/.android && touch ~/.android/repositories.cfg
-          yes | buildozer android debug
+          # बिल्डोजर को बिना किसी पुराने पाइप इनपुट (yes) के और फ्रेश तरीके से चला रहे हैं
+          buildozer android clean
+          buildozer android debug
+        env:
+          # गिटहब के डिफ़ॉल्ट SDK/NDK टकराव को रोकने के लिए इसे खाली किया गया है ताकि बिल्डोजर खुद अपनी पसंद का वर्ज़न डाउनलोड करे
+          ANDROID_HOME: ""
+          ANDROID_NDK_HOME: ""
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
