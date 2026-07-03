@@ -28,19 +28,28 @@ jobs:
           sudo apt-get install -y git zip unzip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev tk-dev libgdbm-compat-dev libreoffice-dev libcups2-dev
           pip3 install --user --upgrade buildozer cython virtualenv
 
-      - name: Auto Accept Android SDK Licenses
+      - name: Fix Android SDK Path & Accept Licenses
         run: |
+          # गिटहब के पहले से मौजूद एंड्रॉइड पाथ को सीधे बिल्डोजर के एनवायरनमेंट में सेट करना
           mkdir -p ~/.android
           touch ~/.android/repositories.cfg
-          # यह सीधे एंड्रॉइड एसडीके टूल्स को ऑटो-लाइसेंस असाइन कर देगा
-          mkdir -p "$ANDROID_HOME/licenses" || true
-          echo -e "\n247c16e6023528f1493b237931453d348756b55f" > "$ANDROID_HOME/licenses/android-sdk-license"
-          echo -e "\n84831b9409646a918e30573bab4c9c91346d8abd" > "$ANDROID_HOME/licenses/android-sdk-preview-license"
+          
+          # यह कमांड ऑटोमैटिकली सभी टूल्स और aidl को एक्टिवेट कर देगी
+          export ANDROID_HOME=/usr/local/lib/android/sdk
+          export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin
+          
+          # लाइसेंस एक्सेप्ट करना ताकि बीच में प्रोसेस न रुके
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
-      - name: Fresh Build APK with Buildozer
+      - name: Build APK with Fixed Environment
         run: |
           export PATH=$PATH:~/.local/bin
-          # पुरानी कैशिंग का लफड़ा हटाने के लिए फ्रेश क्लीन रन
+          
+          # गिटहब के डिफॉल्ट पाथ को बिल्ड के समय इस्तेमाल करने के लिए मजबूर करना
+          export ANDROID_HOME=/usr/local/lib/android/sdk
+          export ANDROID_NDK_HOME=/usr/local/lib/android/sdk/ndk/27.3.13750724
+          
+          # पुराना कबाड़ साफ करके फ्रेश रन
           rm -rf .buildozer/
           buildozer android debug
 
