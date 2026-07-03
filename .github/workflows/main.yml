@@ -5,34 +5,19 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+
+    # यह लाइन गिटहब को एक परफेक्ट और फिक्स कोडिंग एनवायरनमेंट में ले जाएगी
+    container:
+      image: gnyers/buildozer:latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install Buildozer Dependencies
+      - name: Clean Cache and Build APK
         run: |
-          sudo apt-get update
-          sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev tk-dev libgdbm-compat-dev libreoffice-dev libcups2-dev
-          pip3 install --user --upgrade buildozer cython virtualenv
-
-      - name: Clean and Build Android APK
-        run: |
-          export PATH=$PATH:~/.local/bin
-          # पुराने किसी भी खराब कॉन्फ़िगरेशन को पूरी तरह डिलीट करने के लिए
+          # किसी भी पुराने कबाड़ को साफ करके सीधे ऑफिशियल तरीके से बिल्ड करना
           rm -rf .buildozer/
-          rm -rf ~/.buildozer/
           buildozer android clean
           buildozer android debug
-
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Quiznova-APK
-          path: ./.buildozer/android/platform/build/outputs/apk/debug/*.apks
