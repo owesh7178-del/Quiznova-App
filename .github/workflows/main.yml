@@ -5,19 +5,47 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
-
-    # यह लाइन गिटहब को एक परफेक्ट और फिक्स कोडिंग एनवायरनमेंट में ले जाएगी
-    container:
-      image: gnyers/buildozer:latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Clean Cache and Build APK
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Buildozer Dependencies
         run: |
-          # किसी भी पुराने कबाड़ को साफ करके सीधे ऑफिशियल तरीके से बिल्ड करना
+          sudo apt-get update
+          sudo apt-get install -y git zip unzip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev tk-dev libgdbm-compat-dev libreoffice-dev libcups2-dev
+          pip3 install --user --upgrade buildozer cython virtualenv
+
+      - name: Auto Accept Android SDK Licenses
+        run: |
+          mkdir -p ~/.android
+          touch ~/.android/repositories.cfg
+          # यह सीधे एंड्रॉइड एसडीके टूल्स को ऑटो-लाइसेंस असाइन कर देगा
+          mkdir -p "$ANDROID_HOME/licenses" || true
+          echo -e "\n247c16e6023528f1493b237931453d348756b55f" > "$ANDROID_HOME/licenses/android-sdk-license"
+          echo -e "\n84831b9409646a918e30573bab4c9c91346d8abd" > "$ANDROID_HOME/licenses/android-sdk-preview-license"
+
+      - name: Fresh Build APK with Buildozer
+        run: |
+          export PATH=$PATH:~/.local/bin
+          # पुरानी कैशिंग का लफड़ा हटाने के लिए फ्रेश क्लीन रन
           rm -rf .buildozer/
-          buildozer android clean
           buildozer android debug
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Quiznova-APK
+          path: ./.buildozer/android/platform/build/outputs/apk/debug/*.apk
