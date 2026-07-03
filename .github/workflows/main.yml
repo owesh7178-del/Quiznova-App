@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout code
@@ -28,30 +28,21 @@ jobs:
           sudo apt-get install -y git zip unzip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev tk-dev libgdbm-compat-dev libreoffice-dev libcups2-dev
           pip3 install --user --upgrade buildozer cython virtualenv
 
-      - name: Fix Android SDK Path & Accept Licenses
-        run: |
-          # गिटहब के पहले से मौजूद एंड्रॉइड पाथ को सीधे बिल्डोजर के एनवायरनमेंट में सेट करना
-          mkdir -p ~/.android
-          touch ~/.android/repositories.cfg
-          
-          # यह कमांड ऑटोमैटिकली सभी टूल्स और aidl को एक्टिवेट कर देगी
-          export ANDROID_HOME=/usr/local/lib/android/sdk
-          export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin
-          
-          # लाइसेंस एक्सेप्ट करना ताकि बीच में प्रोसेस न रुके
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
-
-      - name: Build APK with Fixed Environment
+      - name: Build APK with Fresh SDK
         run: |
           export PATH=$PATH:~/.local/bin
           
-          # गिटहब के डिफॉल्ट पाथ को बिल्ड के समय इस्तेमाल करने के लिए मजबूर करना
-          export ANDROID_HOME=/usr/local/lib/android/sdk
-          export ANDROID_NDK_HOME=/usr/local/lib/android/sdk/ndk/27.3.13750724
+          # गिटहब के पहले से मौजूद डिफ़ॉल्ट पाथ को पूरी तरह मिटा रहे हैं 
+          # ताकि बिल्डोजर खुद नया और सही SDK/NDK डाउनलोड करे जिसमें aidl एरर नहीं आता
+          unset ANDROID_HOME
+          unset ANDROID_NDK_HOME
           
           # पुराना कबाड़ साफ करके फ्रेश रन
           rm -rf .buildozer/
-          buildozer android debug
+          rm -rf ~/.buildozer/
+          
+          # ऑटो-लाइसेंस एक्सेप्ट के साथ फ्रेश बिल्ड
+          yes | buildozer android debug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
