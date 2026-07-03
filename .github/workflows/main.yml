@@ -5,22 +5,17 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Build Android APK with Buildozer
+        # यहाँ हम सीधे Kivy की ऑफिशियल डॉकर इमेज का इस्तेमाल कर रहे हैं
+        uses: docker://kivy/buildozer:latest
         with:
-          python-version: '3.11' # यहाँ टाइपो को ठीक कर दिया गया है
-
-      - name: Buildozer Action
-        uses: Subspace02/buildozer-action@v2
-        with:
-          command: buildozer android debug
-          repository_root: .
+          args: android debug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
