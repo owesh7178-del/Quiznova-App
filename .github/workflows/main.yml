@@ -32,20 +32,19 @@ jobs:
         run: |
           export PATH=$PATH:~/.local/bin
           
-          # गिटहब के पहले से मौजूद डिफ़ॉल्ट पाथ को पूरी तरह मिटा रहे हैं 
-          # ताकि बिल्डोजर खुद नया और सही SDK/NDK डाउनलोड करे जिसमें aidl एरर नहीं आता
+          # गिटहब के डिफॉल्ट पाथ हटा रहे हैं ताकि एरर न आए
           unset ANDROID_HOME
           unset ANDROID_NDK_HOME
           
-          # पुराना कबाड़ साफ करके फ्रेश रन
+          # पुराना कबाड़ पूरी तरह साफ करने के लिए
           rm -rf .buildozer/
           rm -rf ~/.buildozer/
           
-          # ऑटो-लाइसेंस एक्सेप्ट के साथ फ्रेश बिल्ड
+          # ऑटोमैटिकली लाइसेंस एक्सेप्ट करके बिल्ड शुरू करना
           yes | buildozer android debug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Quiznova-APK
-          path: ./.buildozer/android/platform/build/outputs/apk/debug/*.apk
+          path: .buildozer/android/platform/build/outputs/apk/
