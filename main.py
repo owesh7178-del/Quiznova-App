@@ -13,6 +13,7 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.scrollview import ScrollView
 from kivy.core.window import Window
 from kivy.clock import Clock
+from kivmob import KivMob  # विज्ञापन के लिए KivMob
 
 Window.size = (400, 650)
 
@@ -32,7 +33,6 @@ def load_game_data():
         try:
             with open(SAVE_FILE, "r", encoding="utf-8") as f:
                 loaded_data = json.load(f)
-                # यह सुनिश्चित करने के लिए कि पुराना डेटा नए फॉर्मेट से मैच करे
                 if "name" in loaded_data and "scores" in loaded_data:
                     USER_DATA = loaded_data
         except Exception as e:
@@ -49,12 +49,10 @@ def save_game_data():
 
 class LogoScreen(Screen):
     def on_enter(self):
-        # गेम शुरू होते ही सबसे पहले पुराना सेव डेटा लोड करेंगे
         load_game_data()
         Clock.schedule_once(self.go_to_profile, 2.5)
 
     def go_to_profile(self, dt):
-        # अगर यूजर पहले ही नाम रजिस्टर कर चुका है, तो सीधे लेवल्स स्क्रीन पर भेजें
         if USER_DATA["name"] != "Guest" and USER_DATA["name"].strip() != "":
             self.manager.get_screen('menu').refresh_levels()
             self.manager.current = 'menu'
@@ -102,7 +100,6 @@ class ProfileScreen(Screen):
         if self.name_input.text.strip():
             USER_DATA["name"] = self.name_input.text.strip()
         
-        # नाम डालते ही फाइल में सेव कर देंगे
         save_game_data()
         self.manager.get_screen('menu').refresh_levels()
         self.manager.current = 'menu'
@@ -216,6 +213,7 @@ class QuizScreen(Screen):
         self.time_left = 15
         self.timer_event = None
         self.clickable = True  
+        self.questions_answered_count = 0  # 👈 हर 5 सवालों को गिनने के लिए काउंटर लगाया
 
     def load_level(self, level_num):
         self.level_num = level_num
@@ -233,6 +231,7 @@ class QuizScreen(Screen):
                 self.questions = random.sample(self.questions, 20)
             self.current_q_index = 0
             self.score = 0
+            self.questions_answered_count = 0  # लेवल शुरू होते ही काउंटर रीसेट
             self.show_question()
             return True
         except:
@@ -264,7 +263,6 @@ class QuizScreen(Screen):
             if self.score > USER_DATA["scores"][lvl_str]["best"]:
                 USER_DATA["scores"][lvl_str]["best"] = self.score
             
-            # हर क्विज खत्म होने पर तुरंत प्रोग्रेस को सेव करेंगे
             save_game_data()
             
             stars = "⭐"
@@ -277,6 +275,9 @@ class QuizScreen(Screen):
             self.info_label.text = "🎉 Level Completed!"
             self.question_label.text = f"🏆 MATCH OVER! 🏆\n\nYour Score: {self.score} / 20\nRating: {stars}"
             
+            # मैच खत्म होने पर भी विज्ञापन दिखाएं
+            App.get_running_app().show_interstitial_ad()
+            
             home_btn = Button(text="Back to Levels Menu", font_size='18sp', background_color=(0.1, 0.5, 0.8, 1), background_normal='')
             home_btn.bind(on_release=self.go_back)
             self.options_layout.add_widget(home_btn)
@@ -287,12 +288,8 @@ class QuizScreen(Screen):
         if self.time_left <= 0:
             self.stop_timer()
             self.clickable = False
+            self.questions_answered_count += 1  # टाइमर खत्म होने को भी जवाब माना जाएगा
             Clock.schedule_once(self.next_question, 1.0)
-
-    def stop_timer(self):
-        if self.timer_event:
-            Clock.unschedule(self.timer_event)
-            self.timer_event = None
 
     def check_answer(self, instance):
         if not self.clickable or self.current_q_index >= len(self.questions):
@@ -309,14 +306,22 @@ class QuizScreen(Screen):
                 
         if instance.text == correct_ans:
             self.score += 1
+            
+        self.questions_answered_count += 1  # खिलाड़ी ने जवाब दिया, काउंटर बढ़ाएं
         Clock.schedule_once(self.next_question, 1.0)
 
     def next_question(self, dt):
         self.current_q_index += 1
+        
+        # 💰 मुख्य बदलाव: अगर 5 सवाल पूरे हो गए हैं (और अभी गेम खत्म नहीं हुआ है) तो विज्ञापन दिखाओ!
+        if self.questions_answered_count % 5 == 0 and self.current_q_index < len(self.questions):
+            App.get_running_app().show_interstitial_ad()
+            
         self.show_question()
 
     def go_back(self, instance):
         self.stop_timer()
+        App.get_running_app().show_interstitial_ad()
         self.manager.get_screen('menu').refresh_levels()
         self.manager.current = 'menu'
 
@@ -372,7 +377,6 @@ class CertificateScreen(Screen):
         content.bind(size=content.setter('text_size'))
         self.layout.add_widget(content)
         
-        # 📞 असली क्लेम प्राइज बटन जो सीधे आपकी ईमेल आईडी पर मेल ड्राफ्ट कर देगा
         claim_btn = Button(text="📧 Send Screenshot & Claim Reward", font_size='16sp', size_hint_y=0.15, background_color=(0.1, 0.6, 0.3, 1), background_normal='')
         claim_btn.bind(on_release=self.claim_reward)
         self.layout.add_widget(claim_btn)
@@ -382,12 +386,10 @@ class CertificateScreen(Screen):
         self.layout.add_widget(back_btn)
 
     def claim_reward(self, instance):
-        # यहाँ 'your_email@gmail.com' की जगह अपनी असली ईमेल आईडी डाल देना पार्टनर
         email_id = "your_email@gmail.com"
         subject = f"Quiznova Winner Reward Claim - {USER_DATA['name']}"
         body = f"Hello, I have successfully completed all 21 levels of Quiznova with a perfect 20/20 score! My registered name is {USER_DATA['name']}. Please review my attached screenshot for the ₹2,000 prize."
         
-        # यूआरएल इनकोडिंग ईमेल ओपन करने के लिए
         url = f"mailto:{email_id}?subject={subject.replace(' ', '%20')}&body={body.replace(' ', '%20')}"
         webbrowser.open(url)
 
@@ -397,6 +399,14 @@ class CertificateScreen(Screen):
 
 class QuizNovaApp(App):
     def build(self):
+        self.ads = None
+        try:
+            self.ads = KivMob("ca-app-pub-3940256099942544~3347511713")  # Test App ID
+            self.ads.new_interstitial("ca-app-pub-3940256099942544/1033173712")  # Test Interstitial ID
+            self.ads.request_interstitial()
+        except Exception as e:
+            print(f"Ads initialization failed: {e}")
+
         sm = ScreenManager()
         sm.add_widget(LogoScreen(name='logo'))
         sm.add_widget(ProfileScreen(name='profile'))
@@ -405,6 +415,14 @@ class QuizNovaApp(App):
         sm.add_widget(CertificateLockScreen(name='certificate_lock'))
         sm.add_widget(CertificateScreen(name='certificate'))
         return sm
+
+    def show_interstitial_ad(self):
+        try:
+            if self.ads and self.ads.is_interstitial_loaded():
+                self.ads.show_interstitial()
+                self.ads.request_interstitial()  # अगला विज्ञापन पहले से लोड करके रखें
+        except Exception as e:
+            print(f"Failed to show ad: {e}")
 
 
 if __name__ == '__main__':
