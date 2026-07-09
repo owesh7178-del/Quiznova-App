@@ -1,7 +1,7 @@
 import json
 import os
 import random
-import webbrowser  # ईमेल या लिंक खोलने के लिए
+import webbrowser
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.button import Button
@@ -13,20 +13,22 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.scrollview import ScrollView
 from kivy.core.window import Window
 from kivy.clock import Clock
-from kivmob import KivMob  # विज्ञापन के लिए KivMob
+
+# KivMob को सुरक्षित तरीके से इम्पोर्ट करने के लिए चेक
+try:
+    from kivmob import KivMob
+    KIVMOB_AVAILABLE = True
+except ImportError:
+    KIVMOB_AVAILABLE = False
 
 Window.size = (400, 650)
-
-# सेव फाइल का नाम
 SAVE_FILE = "quiznova_save.json"
 
-# ग्लोबल डेटा डिक्शनरी
 USER_DATA = {
     "name": "Guest",
     "scores": {str(i): {"best": 0, "last": 0} for i in range(1, 22)}
 }
 
-# 📁 डेटा लोड करने का फ़ंक्शन
 def load_game_data():
     global USER_DATA
     if os.path.exists(SAVE_FILE):
@@ -38,7 +40,6 @@ def load_game_data():
         except Exception as e:
             print(f"Error loading data: {e}")
 
-# 📁 डेटा सेव करने का फ़ंक्शन
 def save_game_data():
     try:
         with open(SAVE_FILE, "w", encoding="utf-8") as f:
@@ -213,7 +214,7 @@ class QuizScreen(Screen):
         self.time_left = 15
         self.timer_event = None
         self.clickable = True  
-        self.questions_answered_count = 0  # 👈 हर 5 सवालों को गिनने के लिए काउंटर लगाया
+        self.questions_answered_count = 0  
 
     def load_level(self, level_num):
         self.level_num = level_num
@@ -231,7 +232,7 @@ class QuizScreen(Screen):
                 self.questions = random.sample(self.questions, 20)
             self.current_q_index = 0
             self.score = 0
-            self.questions_answered_count = 0  # लेवल शुरू होते ही काउंटर रीसेट
+            self.questions_answered_count = 0  
             self.show_question()
             return True
         except:
@@ -275,7 +276,6 @@ class QuizScreen(Screen):
             self.info_label.text = "🎉 Level Completed!"
             self.question_label.text = f"🏆 MATCH OVER! 🏆\n\nYour Score: {self.score} / 20\nRating: {stars}"
             
-            # मैच खत्म होने पर भी विज्ञापन दिखाएं
             App.get_running_app().show_interstitial_ad()
             
             home_btn = Button(text="Back to Levels Menu", font_size='18sp', background_color=(0.1, 0.5, 0.8, 1), background_normal='')
@@ -288,7 +288,7 @@ class QuizScreen(Screen):
         if self.time_left <= 0:
             self.stop_timer()
             self.clickable = False
-            self.questions_answered_count += 1  # टाइमर खत्म होने को भी जवाब माना जाएगा
+            self.questions_answered_count += 1  
             Clock.schedule_once(self.next_question, 1.0)
 
     def check_answer(self, instance):
@@ -307,13 +307,12 @@ class QuizScreen(Screen):
         if instance.text == correct_ans:
             self.score += 1
             
-        self.questions_answered_count += 1  # खिलाड़ी ने जवाब दिया, काउंटर बढ़ाएं
+        self.questions_answered_count += 1  
         Clock.schedule_once(self.next_question, 1.0)
 
     def next_question(self, dt):
         self.current_q_index += 1
         
-        # 💰 मुख्य बदलाव: अगर 5 सवाल पूरे हो गए हैं (और अभी गेम खत्म नहीं हुआ है) तो विज्ञापन दिखाओ!
         if self.questions_answered_count % 5 == 0 and self.current_q_index < len(self.questions):
             App.get_running_app().show_interstitial_ad()
             
@@ -400,12 +399,13 @@ class CertificateScreen(Screen):
 class QuizNovaApp(App):
     def build(self):
         self.ads = None
-        try:
-            self.ads = KivMob("ca-app-pub-3940256099942544~3347511713")  # Test App ID
-            self.ads.new_interstitial("ca-app-pub-3940256099942544/1033173712")  # Test Interstitial ID
-            self.ads.request_interstitial()
-        except Exception as e:
-            print(f"Ads initialization failed: {e}")
+        if KIVMOB_AVAILABLE:
+            try:
+                self.ads = KivMob("ca-app-pub-3940256099942544~3347511713")  # Test App ID
+                self.ads.new_interstitial("ca-app-pub-3940256099942544/1033173712")  # Test Interstitial ID
+                self.ads.request_interstitial()
+            except Exception as e:
+                print(f"Ads initialization failed: {e}")
 
         sm = ScreenManager()
         sm.add_widget(LogoScreen(name='logo'))
@@ -417,12 +417,13 @@ class QuizNovaApp(App):
         return sm
 
     def show_interstitial_ad(self):
-        try:
-            if self.ads and self.ads.is_interstitial_loaded():
-                self.ads.show_interstitial()
-                self.ads.request_interstitial()  # अगला विज्ञापन पहले से लोड करके रखें
-        except Exception as e:
-            print(f"Failed to show ad: {e}")
+        if KIVMOB_AVAILABLE and self.ads:
+            try:
+                if self.ads.is_interstitial_loaded():
+                    self.ads.show_interstitial()
+                    self.ads.request_interstitial()
+            except Exception as e:
+                print(f"Failed to show ad: {e}")
 
 
 if __name__ == '__main__':
