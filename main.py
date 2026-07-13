@@ -14,8 +14,9 @@ from kivy.uix.scrollview import ScrollView
 from kivy.core.window import Window
 from kivy.clock import Clock
 
-# फोन स्क्रीन के लिए फिक्स साइज हटा दी है ताकि यह पूरे फोन में सही से फैले
-SAVE_FILE = "quiznova_save.json"
+# ऐप का बेस पाथ सेट करना (ताकि लेवल्स फोल्डर आसानी से मिल सके)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SAVE_FILE = os.path.join(BASE_DIR, "quiznova_save.json")
 
 USER_DATA = {
     "name": "Guest",
@@ -59,8 +60,9 @@ class ProfileScreen(Screen):
         super().__init__(**kwargs)
         layout = BoxLayout(orientation='vertical', padding=40, spacing=25)
         
-        if os.path.exists("logo.png"):
-            layout.add_widget(Image(source="logo.png", size_hint_y=0.25, fit_mode='contain'))
+        logo_path = os.path.join(BASE_DIR, "logo.png")
+        if os.path.exists(logo_path):
+            layout.add_widget(Image(source=logo_path, size_hint_y=0.25, fit_mode='contain'))
         else:
             layout.add_widget(Label(text="✨ QUIZNOVA ✨", font_size='38sp', bold=True, color=(0.1, 0.7, 1, 1), size_hint_y=0.2))
             
@@ -102,14 +104,12 @@ class ProfileScreen(Screen):
 class MenuScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # मेन लेआउट में पैडिंग और स्पेसिंग बढ़ाई
         self.main_layout = BoxLayout(orientation='vertical', padding=30, spacing=20)
         self.add_widget(self.main_layout)
 
     def refresh_levels(self):
         self.main_layout.clear_widgets()
         
-        # प्रोफाइल बार को फिक्स साइज दी ताकि टेक्स्ट ऊपर न चढ़े
         profile_bar = BoxLayout(orientation='horizontal', size_hint_y=None, height=60, spacing=10)
         profile_bar.add_widget(Label(text=f"👤 {USER_DATA['name']}", font_size='20sp', bold=True, halign='left', size_hint_x=0.6))
         
@@ -118,13 +118,11 @@ class MenuScreen(Screen):
         profile_bar.add_widget(prize_btn)
         self.main_layout.add_widget(profile_bar)
         
-        # स्क्रॉल व्यू को बची हुई पूरी जगह दी
         scroll = ScrollView(size_hint_y=1.0)
         grid = GridLayout(cols=1, spacing=15, size_hint_y=None)
         grid.bind(minimum_height=grid.setter('height'))
         
         for i in range(1, 22):
-            # हर लेवल रो की हाइट मोबाइल स्क्रीन के लिए 70dp सेट की ताकि दूरी बनी रहे
             level_box = BoxLayout(orientation='horizontal', spacing=15, size_hint_y=None, height=70)
             
             btn = Button(
@@ -217,10 +215,13 @@ class QuizScreen(Screen):
     def load_level(self, level_num):
         self.level_num = level_num
         self.options_layout.clear_widgets()
-        file_path = f"levels/level{level_num}.json"
+        
+        # लेवल्स फोल्डर का सही रास्ता सुनिश्चित करना
+        file_path = os.path.join(BASE_DIR, "levels", f"level{level_num}.json")
         
         if not os.path.exists(file_path):
-            self.question_label.text = "⚠️ File Missing! Run generator."
+            self.question_label.text = f"⚠️ File Missing! Generate levels first."
+            print(f"Error: Missing {file_path}")
             return False
             
         try:
@@ -233,7 +234,8 @@ class QuizScreen(Screen):
             self.questions_answered_count = 0  
             self.show_question()
             return True
-        except:
+        except Exception as e:
+            print(f"Error loading level JSON: {e}")
             return False
 
     def show_question(self):
@@ -279,6 +281,11 @@ class QuizScreen(Screen):
             home_btn = Button(text="Back to Levels Menu", font_size='18sp', background_color=(0.1, 0.5, 0.8, 1), background_normal='')
             home_btn.bind(on_release=self.go_back)
             self.options_layout.add_widget(home_btn)
+
+    def stop_timer(self):
+        if self.timer_event:
+            Clock.unschedule(self.timer_event)
+            self.timer_event = None
 
     def update_timer(self, dt):
         self.time_left -= 1
@@ -396,6 +403,9 @@ class CertificateScreen(Screen):
 
 class QuizNovaApp(App):
     def build(self):
+        # कंप्यूटर स्क्रीन का एक फिक्स साइज सेट कर रहे हैं ताकि टेस्टिंग में आसानी हो
+        Window.size = (400, 700)
+        
         sm = ScreenManager()
         sm.add_widget(LogoScreen(name='logo'))
         sm.add_widget(ProfileScreen(name='profile'))
