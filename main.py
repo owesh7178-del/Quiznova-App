@@ -14,7 +14,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.core.window import Window
 from kivy.clock import Clock
 
-Window.size = (400, 650)
+# फोन स्क्रीन के लिए फिक्स साइज हटा दी है ताकि यह पूरे फोन में सही से फैले
 SAVE_FILE = "quiznova_save.json"
 
 USER_DATA = {
@@ -71,7 +71,7 @@ class ProfileScreen(Screen):
             hint_text="Your Name Here...", 
             multiline=False, 
             font_size='20sp',
-            size_hint_y=0.08,
+            size_hint_y=0.1,
             padding=[10, 10, 10, 10]
         )
         layout.add_widget(self.name_input)
@@ -82,7 +82,7 @@ class ProfileScreen(Screen):
             bold=True, 
             background_color=(0.1, 0.6, 0.4, 1),
             background_normal='',
-            size_hint_y=0.12
+            size_hint_y=0.15
         )
         start_btn.bind(on_release=self.save_profile)
         layout.add_widget(start_btn)
@@ -102,44 +102,49 @@ class ProfileScreen(Screen):
 class MenuScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.main_layout = BoxLayout(orientation='vertical', padding=20, spacing=15)
+        # मेन लेआउट में पैडिंग और स्पेसिंग बढ़ाई
+        self.main_layout = BoxLayout(orientation='vertical', padding=30, spacing=20)
         self.add_widget(self.main_layout)
 
     def refresh_levels(self):
         self.main_layout.clear_widgets()
         
-        profile_bar = BoxLayout(orientation='horizontal', size_hint_y=0.1)
-        profile_bar.add_widget(Label(text=f"👤 {USER_DATA['name']}", font_size='18sp', bold=True, halign='left'))
+        # प्रोफाइल बार को फिक्स साइज दी ताकि टेक्स्ट ऊपर न चढ़े
+        profile_bar = BoxLayout(orientation='horizontal', size_hint_y=None, height=60, spacing=10)
+        profile_bar.add_widget(Label(text=f"👤 {USER_DATA['name']}", font_size='20sp', bold=True, halign='left', size_hint_x=0.6))
         
-        prize_btn = Button(text="🏆 Claim ₹2000", font_size='14sp', size_hint_x=0.4, background_color=(1, 0.7, 0, 1), background_normal='')
+        prize_btn = Button(text="🏆 Claim ₹2000", font_size='16sp', bold=True, size_hint_x=0.4, background_color=(1, 0.7, 0, 1), background_normal='')
         prize_btn.bind(on_release=self.check_prize_claim)
         profile_bar.add_widget(prize_btn)
         self.main_layout.add_widget(profile_bar)
         
-        scroll = ScrollView(size_hint_y=0.9)
-        grid = GridLayout(cols=1, spacing=12, size_hint_y=None)
+        # स्क्रॉल व्यू को बची हुई पूरी जगह दी
+        scroll = ScrollView(size_hint_y=1.0)
+        grid = GridLayout(cols=1, spacing=15, size_hint_y=None)
         grid.bind(minimum_height=grid.setter('height'))
         
         for i in range(1, 22):
-            level_box = BoxLayout(orientation='horizontal', spacing=10, size_hint_y=None, height=60)
+            # हर लेवल रो की हाइट मोबाइल स्क्रीन के लिए 70dp सेट की ताकि दूरी बनी रहे
+            level_box = BoxLayout(orientation='horizontal', spacing=15, size_hint_y=None, height=70)
             
             btn = Button(
                 text=f"Level {i}",
-                font_size='16sp',
+                font_size='18sp',
                 bold=True,
                 background_color=(0.15, 0.25, 0.4, 1),
                 background_normal='',
-                size_hint_x=0.35
+                size_hint_x=0.4
             )
             btn.bind(on_release=self.make_callback(i))
             
             best_s = USER_DATA["scores"][str(i)]["best"]
             last_s = USER_DATA["scores"][str(i)]["last"]
             score_lbl = Label(
-                text=f"Best: {best_s}/20  |  Last: {last_s}/20",
-                font_size='14sp',
+                text=f"Best: {best_s}/20\nLast: {last_s}/20",
+                font_size='15sp',
                 color=(0.8, 0.8, 0.8, 1),
-                halign='center'
+                halign='center',
+                size_hint_x=0.6
             )
             
             level_box.add_widget(btn)
@@ -401,7 +406,6 @@ class QuizNovaApp(App):
         return sm
 
     def show_interstitial_ad(self):
-        # एरर फ्री सिस्टम: गेम बिना क्रैश हुए एड्स ट्रिगर करने के लिए बैकग्राउंड सेफ मोड
         print("[ADS]: Every 5th question completed. Ad trigger point reached successfully.")
 
 
