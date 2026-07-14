@@ -13,8 +13,14 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.scrollview import ScrollView
 from kivy.core.window import Window
 from kivy.clock import Clock
+from kivy.utils import platform
+# मोबाइल स्क्रीन कम्पैटिबिलिटी के लिए dp इम्पोर्ट किया
+from kivy.metrics import dp
 
-# ऐप का बेस पाथ सेट करना (ताकि लेवल्स फोल्डर आसानी से मिल सके)
+# केवल कंप्यूटर/डेस्कटॉप के लिए विंडो साइज सेट करना (एंड्रॉयड पर यह रन नहीं होगा)
+if platform not in ('android', 'ios'):
+    Window.size = (450, 750)
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SAVE_FILE = os.path.join(BASE_DIR, "quiznova_save.json")
 
@@ -58,33 +64,35 @@ class LogoScreen(Screen):
 class ProfileScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        layout = BoxLayout(orientation='vertical', padding=40, spacing=25)
+        layout = BoxLayout(orientation='vertical', padding=dp(30), spacing=dp(20))
         
         logo_path = os.path.join(BASE_DIR, "logo.png")
         if os.path.exists(logo_path):
-            layout.add_widget(Image(source=logo_path, size_hint_y=0.25, fit_mode='contain'))
+            layout.add_widget(Image(source=logo_path, size_hint_y=0.3, fit_mode='contain'))
         else:
-            layout.add_widget(Label(text="✨ QUIZNOVA ✨", font_size='38sp', bold=True, color=(0.1, 0.7, 1, 1), size_hint_y=0.2))
+            layout.add_widget(Label(text="✨ QUIZNOVA ✨", font_size='36sp', bold=True, color=(0.1, 0.7, 1, 1), size_hint_y=0.25))
             
-        layout.add_widget(Label(text="Enter Your Name to Register:", font_size='18sp', color=(0.9, 0.9, 0.9, 1)))
+        layout.add_widget(Label(text="Enter Your Name to Register:", font_size='18sp', color=(0.9, 0.9, 0.9, 1), size_hint_y=0.1))
         
         self.name_input = TextInput(
             text="", 
             hint_text="Your Name Here...", 
             multiline=False, 
-            font_size='20sp',
-            size_hint_y=0.1,
-            padding=[10, 10, 10, 10]
+            font_size='18sp',
+            size_hint_y=None,
+            height=dp(50),
+            padding=[dp(10), dp(10), dp(10), dp(10)]
         )
         layout.add_widget(self.name_input)
         
         start_btn = Button(
             text="START QUIZ 🎮", 
-            font_size='22sp', 
+            font_size='20sp', 
             bold=True, 
             background_color=(0.1, 0.6, 0.4, 1),
             background_normal='',
-            size_hint_y=0.15
+            size_hint_y=None,
+            height=dp(60)
         )
         start_btn.bind(on_release=self.save_profile)
         layout.add_widget(start_btn)
@@ -104,26 +112,32 @@ class ProfileScreen(Screen):
 class MenuScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.main_layout = BoxLayout(orientation='vertical', padding=30, spacing=20)
+        self.main_layout = BoxLayout(orientation='vertical', padding=dp(20), spacing=dp(15))
         self.add_widget(self.main_layout)
 
     def refresh_levels(self):
         self.main_layout.clear_widgets()
         
-        profile_bar = BoxLayout(orientation='horizontal', size_hint_y=None, height=60, spacing=10)
-        profile_bar.add_widget(Label(text=f"👤 {USER_DATA['name']}", font_size='20sp', bold=True, halign='left', size_hint_x=0.6))
+        # प्रोफाइल बार को dp स्केल के साथ फिक्स हाइट दी ताकि ओवरलैपिंग न हो
+        profile_bar = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(60), spacing=dp(10))
         
-        prize_btn = Button(text="🏆 Claim ₹2000", font_size='16sp', bold=True, size_hint_x=0.4, background_color=(1, 0.7, 0, 1), background_normal='')
+        name_lbl = Label(text=f"👤 {USER_DATA['name']}", font_size='18sp', bold=True, halign='left', size_hint_x=0.55)
+        name_lbl.bind(size=name_lbl.setter('text_size')) # टेक्स्ट को अलाइन करने के लिए बाइंड किया
+        
+        prize_btn = Button(text="🏆 Claim ₹2000", font_size='14sp', bold=True, size_hint_x=0.45, background_color=(1, 0.7, 0, 1), background_normal='')
         prize_btn.bind(on_release=self.check_prize_claim)
+        
+        profile_bar.add_widget(name_lbl)
         profile_bar.add_widget(prize_btn)
         self.main_layout.add_widget(profile_bar)
         
         scroll = ScrollView(size_hint_y=1.0)
-        grid = GridLayout(cols=1, spacing=15, size_hint_y=None)
+        grid = GridLayout(cols=1, spacing=dp(12), size_hint_y=None)
         grid.bind(minimum_height=grid.setter('height'))
         
         for i in range(1, 22):
-            level_box = BoxLayout(orientation='horizontal', spacing=15, size_hint_y=None, height=70)
+            # हर लेवल रो की हाइट को dp(80) फिक्स किया, जिससे वह स्क्रीन रेजोल्यूशन के हिसाब से एडजस्ट होगी
+            level_box = BoxLayout(orientation='horizontal', spacing=dp(15), size_hint_y=None, height=dp(80))
             
             btn = Button(
                 text=f"Level {i}",
@@ -131,19 +145,22 @@ class MenuScreen(Screen):
                 bold=True,
                 background_color=(0.15, 0.25, 0.4, 1),
                 background_normal='',
-                size_hint_x=0.4
+                size_hint_x=0.45
             )
             btn.bind(on_release=self.make_callback(i))
             
             best_s = USER_DATA["scores"][str(i)]["best"]
             last_s = USER_DATA["scores"][str(i)]["last"]
+            
             score_lbl = Label(
                 text=f"Best: {best_s}/20\nLast: {last_s}/20",
-                font_size='15sp',
+                font_size='14sp',
                 color=(0.8, 0.8, 0.8, 1),
                 halign='center',
-                size_hint_x=0.6
+                valign='middle',
+                size_hint_x=0.55
             )
+            score_lbl.bind(size=score_lbl.setter('text_size'))
             
             level_box.add_widget(btn)
             level_box.add_widget(score_lbl)
@@ -181,23 +198,23 @@ class MenuScreen(Screen):
 class QuizScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.layout = BoxLayout(orientation='vertical', padding=30, spacing=20)
+        self.layout = BoxLayout(orientation='vertical', padding=dp(25), spacing=dp(15))
         
-        header_box = BoxLayout(orientation='horizontal', size_hint_y=0.08)
-        self.info_label = Label(text="", font_size='16sp', color=(1, 0.8, 0.2, 1), halign='left')
-        self.timer_label = Label(text="⏳ 15s", font_size='16sp', bold=True, color=(1, 0.3, 0.3, 1), halign='right')
+        header_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(40))
+        self.info_label = Label(text="", font_size='15sp', color=(1, 0.8, 0.2, 1), halign='left')
+        self.timer_label = Label(text="⏳ 15s", font_size='15sp', bold=True, color=(1, 0.3, 0.3, 1), halign='right')
         header_box.add_widget(self.info_label)
         header_box.add_widget(self.timer_label)
         self.layout.add_widget(header_box)
         
-        self.question_label = Label(text="", font_size='24sp', bold=True, halign='center', valign='middle', size_hint_y=0.32)
+        self.question_label = Label(text="", font_size='22sp', bold=True, halign='center', valign='middle', size_hint_y=0.3)
         self.question_label.bind(size=self.question_label.setter('text_size'))
         self.layout.add_widget(self.question_label)
         
-        self.options_layout = BoxLayout(orientation='vertical', spacing=15, size_hint_y=0.5)
+        self.options_layout = BoxLayout(orientation='vertical', spacing=dp(12), size_hint_y=0.5)
         self.layout.add_widget(self.options_layout)
         
-        self.back_btn = Button(text="Quit Game", font_size='16sp', size_hint_y=0.1, background_color=(0.8, 0.2, 0.2, 1), background_normal='')
+        self.back_btn = Button(text="Quit Game", font_size='16sp', size_hint_y=None, height=dp(50), background_color=(0.8, 0.2, 0.2, 1), background_normal='')
         self.back_btn.bind(on_release=self.go_back)
         self.layout.add_widget(self.back_btn)
         
@@ -216,12 +233,10 @@ class QuizScreen(Screen):
         self.level_num = level_num
         self.options_layout.clear_widgets()
         
-        # लेवल्स फोल्डर का सही रास्ता सुनिश्चित करना
         file_path = os.path.join(BASE_DIR, "levels", f"level{level_num}.json")
         
         if not os.path.exists(file_path):
             self.question_label.text = f"⚠️ File Missing! Generate levels first."
-            print(f"Error: Missing {file_path}")
             return False
             
         try:
@@ -251,7 +266,7 @@ class QuizScreen(Screen):
             options = list(q_data["options"])
             random.shuffle(options)
             for opt in options:
-                btn = Button(text=opt, font_size='19sp', background_color=(0.15, 0.4, 0.6, 1), background_normal='')
+                btn = Button(text=opt, font_size='18sp', background_color=(0.15, 0.4, 0.6, 1), background_normal='')
                 btn.bind(on_release=self.check_answer)
                 self.options_layout.add_widget(btn)
                 
@@ -333,7 +348,7 @@ class QuizScreen(Screen):
 class CertificateLockScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.layout = BoxLayout(orientation='vertical', padding=40, spacing=20)
+        self.layout = BoxLayout(orientation='vertical', padding=dp(30), spacing=dp(20))
         self.status_lbl = Label(text="", font_size='18sp', halign='center', valign='middle', size_hint_y=0.8)
         self.status_lbl.bind(size=self.status_lbl.setter('text_size'))
         self.layout.add_widget(self.status_lbl)
@@ -360,13 +375,13 @@ class CertificateLockScreen(Screen):
 class CertificateScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.layout = BoxLayout(orientation='vertical', padding=30, spacing=20)
+        self.layout = BoxLayout(orientation='vertical', padding=dp(25), spacing=dp(20))
         self.add_widget(self.layout)
 
     def on_enter(self):
         self.layout.clear_widgets()
         
-        title = Label(text="🏆 GRAND WINNER CERTIFICATE 🏆", font_size='24sp', bold=True, color=(1, 0.8, 0.2, 1), size_hint_y=0.15)
+        title = Label(text="🏆 GRAND WINNER CERTIFICATE 🏆", font_size='22sp', bold=True, color=(1, 0.8, 0.2, 1), size_hint_y=0.15)
         self.layout.add_widget(title)
         
         certi_text = (
@@ -403,9 +418,6 @@ class CertificateScreen(Screen):
 
 class QuizNovaApp(App):
     def build(self):
-        # कंप्यूटर स्क्रीन का एक फिक्स साइज सेट कर रहे हैं ताकि टेस्टिंग में आसानी हो
-        Window.size = (400, 700)
-        
         sm = ScreenManager()
         sm.add_widget(LogoScreen(name='logo'))
         sm.add_widget(ProfileScreen(name='profile'))
