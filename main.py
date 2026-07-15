@@ -14,14 +14,15 @@ from kivy.uix.scrollview import ScrollView
 from kivy.core.window import Window
 from kivy.clock import Clock
 from kivy.utils import platform
-# मोबाइल स्क्रीन कम्पैटिबिलिटी के लिए dp इम्पोर्ट किया
 from kivy.metrics import dp
 
-# केवल कंप्यूटर/डेस्कटॉप के लिए विंडो साइज सेट करना (एंड्रॉयड पर यह रन नहीं होगा)
-if platform not in ('android', 'ios'):
-    Window.size = (450, 750)
+# कंप्यूटर और एंड्रॉयड दोनों के लिए सही रास्ता (Path) सेट करना
+if platform == 'android':
+    from android.storage import app_storage_dir
+    BASE_DIR = app_storage_dir()
+else:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SAVE_FILE = os.path.join(BASE_DIR, "quiznova_save.json")
 
 USER_DATA = {
@@ -66,7 +67,7 @@ class ProfileScreen(Screen):
         super().__init__(**kwargs)
         layout = BoxLayout(orientation='vertical', padding=dp(30), spacing=dp(20))
         
-        logo_path = os.path.join(BASE_DIR, "logo.png")
+        logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logo.png")
         if os.path.exists(logo_path):
             layout.add_widget(Image(source=logo_path, size_hint_y=0.3, fit_mode='contain'))
         else:
@@ -118,11 +119,10 @@ class MenuScreen(Screen):
     def refresh_levels(self):
         self.main_layout.clear_widgets()
         
-        # प्रोफाइल बार को dp स्केल के साथ फिक्स हाइट दी ताकि ओवरलैपिंग न हो
         profile_bar = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(60), spacing=dp(10))
         
         name_lbl = Label(text=f"👤 {USER_DATA['name']}", font_size='18sp', bold=True, halign='left', size_hint_x=0.55)
-        name_lbl.bind(size=name_lbl.setter('text_size')) # टेक्स्ट को अलाइन करने के लिए बाइंड किया
+        name_lbl.bind(size=name_lbl.setter('text_size')) 
         
         prize_btn = Button(text="🏆 Claim ₹2000", font_size='14sp', bold=True, size_hint_x=0.45, background_color=(1, 0.7, 0, 1), background_normal='')
         prize_btn.bind(on_release=self.check_prize_claim)
@@ -136,7 +136,6 @@ class MenuScreen(Screen):
         grid.bind(minimum_height=grid.setter('height'))
         
         for i in range(1, 22):
-            # हर लेवल रो की हाइट को dp(80) फिक्स किया, जिससे वह स्क्रीन रेजोल्यूशन के हिसाब से एडजस्ट होगी
             level_box = BoxLayout(orientation='horizontal', spacing=dp(15), size_hint_y=None, height=dp(80))
             
             btn = Button(
@@ -233,10 +232,12 @@ class QuizScreen(Screen):
         self.level_num = level_num
         self.options_layout.clear_widgets()
         
-        file_path = os.path.join(BASE_DIR, "levels", f"level{level_num}.json")
+        # एंड्रॉयड इंटरनल एसेट पाथ को सही से हैंडल करना
+        src_dir = os.path.dirname(os.path.abspath(__file__))
+        file_path = os.path.join(src_dir, "levels", f"level{level_num}.json")
         
         if not os.path.exists(file_path):
-            self.question_label.text = f"⚠️ File Missing! Generate levels first."
+            self.question_label.text = f"⚠️ File Missing! Level JSON not found."
             return False
             
         try:
