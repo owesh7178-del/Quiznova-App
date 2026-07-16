@@ -16,21 +16,20 @@ from kivy.clock import Clock
 from kivy.utils import platform
 from kivy.metrics import dp
 
-# डेस्कटॉप/कंप्यूटर के लिए विंडो साइज (मोबाइल पर यह ऑटो-एडजस्ट होगा)
+# डेस्कटॉप/कंप्यूटर के लिए विंडो साइज
 if platform not in ('android', 'ios'):
     Window.size = (450, 750)
 
-# कंप्यूटर और एंड्रॉयड दोनों के लिए सही फाइल पाथ (Path) सेट करना
+# एंड्रॉयड पर क्रैश से बचने के लिए सबसे सुरक्षित पाथ लॉजिक
 if platform == 'android':
-    from android.storage import app_storage_dir
-    BASE_DIR = app_storage_dir()
+    # Kivy का अपना इन-बिल्ट तरीका जो कभी क्रैश नहीं होता
+    BASE_DIR = App().user_data_dir
 else:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 SRC_DIR = os.path.dirname(os.path.abspath(__file__))
 SAVE_FILE = os.path.join(BASE_DIR, "quiznova_save.json")
 
-# हर लेवल का फुल स्कोर अब 50 के हिसाब से सेट होगा
 USER_DATA = {
     "name": "",
     "scores": {str(i): {"best": 0, "last": 0} for i in range(1, 22)}
@@ -157,7 +156,6 @@ class MenuScreen(Screen):
             best_s = USER_DATA["scores"][str(i)]["best"]
             last_s = USER_DATA["scores"][str(i)]["last"]
             
-            # अब स्कोर 20 के बजाय /50 दिखेगा
             score_lbl = Label(
                 text=f"Best: {best_s}/50\nLast: {last_s}/50",
                 font_size='14sp',
@@ -193,7 +191,6 @@ class MenuScreen(Screen):
             if level_best < 50:
                 has_won_all = False
         
-        # 21 लेवल्स * 50 सवाल = 1050 कुल स्कोर होना चाहिए जीतने के लिए
         if has_won_all and total_score_achieved == 1050:
             self.manager.current = 'certificate'
         else:
@@ -231,7 +228,7 @@ class QuizScreen(Screen):
         self.current_q_index = 0
         self.score = 0
         self.level_num = 1
-        self.time_left = 5  # टाइमर 5 सेकंड सेट किया
+        self.time_left = 5  # 5 सेकंड का टाइमर
         self.timer_event = None
         self.clickable = True  
         self.questions_answered_count = 0  
@@ -249,7 +246,6 @@ class QuizScreen(Screen):
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 self.questions = json.load(f)
-            # आपके प्लान के मुताबिक: अब हर लेवल में 50 सवाल लोड होंगे
             if len(self.questions) > 50:
                 self.questions = random.sample(self.questions, 50)
             self.current_q_index = 0
@@ -268,7 +264,6 @@ class QuizScreen(Screen):
         
         if self.current_q_index < len(self.questions):
             q_data = self.questions[self.current_q_index]
-            # यहाँ भी कुल स्कोर 50 में से दिखेगा
             self.info_label.text = f"🏅 Lvl {self.level_num} | Q: {self.current_q_index + 1}/50 | Score: {self.score}"
             self.question_label.text = q_data["question"]
             
@@ -279,7 +274,7 @@ class QuizScreen(Screen):
                 btn.bind(on_release=self.check_answer)
                 self.options_layout.add_widget(btn)
                 
-            self.time_left = 5  # हर नए सवाल के लिए 5 सेकंड रीसेट
+            self.time_left = 5
             self.timer_label.text = f"⏳ {self.time_left}s"
             self.timer_event = Clock.schedule_interval(self.update_timer, 1.0)
         else:
