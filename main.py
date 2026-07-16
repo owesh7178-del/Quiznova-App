@@ -16,19 +16,32 @@ from kivy.clock import Clock
 from kivy.utils import platform
 from kivy.metrics import dp
 
-# डेस्कटॉप/कंप्यूटर के लिए विंडो साइज
+# KivMob को केवल एंड्रॉयड पर ही लोड करेंगे ताकि कंप्यूटर पर एरर न आए
+if platform == 'android':
+    try:
+        from kivmob import KivMob
+        KIVMOB_AVAILABLE = True
+    except ImportError:
+        KIVMOB_AVAILABLE = False
+else:
+    KIVMOB_AVAILABLE = False
+
+# डेस्कटॉप विंडो साइज
 if platform not in ('android', 'ios'):
     Window.size = (450, 750)
 
-# एंड्रॉयड पर क्रैश से बचने के लिए सबसे सुरक्षित पाथ लॉजिक
 if platform == 'android':
-    # Kivy का अपना इन-बिल्ट तरीका जो कभी क्रैश नहीं होता
     BASE_DIR = App().user_data_dir
 else:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 SRC_DIR = os.path.dirname(os.path.abspath(__file__))
 SAVE_FILE = os.path.join(BASE_DIR, "quiznova_save.json")
+
+# ⚠️ यहाँ अपनी असली ADMOB IDs डालें (जब आपके पास हों)
+# अभी टेस्टिंग के लिए मैंने Google की "Test Interstitial ID" डाली है ताकि आपका ऐप तुरंत पैसे कमाने के लिए तैयार रहे
+ADMOB_APP_ID = "ca-app-pub-3940256099942544~3347511713" # Test App ID
+INTERSTITIAL_AD_ID = "ca-app-pub-3940256099942544/1033173712" # Test Interstitial ID
 
 USER_DATA = {
     "name": "",
@@ -57,7 +70,6 @@ def save_game_data():
 class LogoScreen(Screen):
     def on_enter(self):
         load_game_data()
-        # ठीक 3.5 सेकंड का लोगो टाइमर
         Clock.schedule_once(self.go_to_profile, 3.5)
 
     def go_to_profile(self, dt):
@@ -125,7 +137,6 @@ class MenuScreen(Screen):
         self.main_layout.clear_widgets()
         
         profile_bar = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(60), spacing=dp(10))
-        
         name_lbl = Label(text=f"👤 {USER_DATA['name']}", font_size='18sp', bold=True, halign='left', size_hint_x=0.55)
         name_lbl.bind(size=name_lbl.setter('text_size')) 
         
@@ -228,7 +239,7 @@ class QuizScreen(Screen):
         self.current_q_index = 0
         self.score = 0
         self.level_num = 1
-        self.time_left = 5  # 5 सेकंड का टाइमर
+        self.time_left = 5
         self.timer_event = None
         self.clickable = True  
         self.questions_answered_count = 0  
@@ -337,7 +348,6 @@ class QuizScreen(Screen):
     def next_question(self, dt):
         self.current_q_index += 1
         
-        # हर 3 सवालों के बाद 3 विज्ञापन (Ads) का ट्रिगर
         if self.questions_answered_count % 3 == 0 and self.current_q_index < len(self.questions):
             App.get_running_app().show_three_ads()
             
@@ -423,6 +433,14 @@ class CertificateScreen(Screen):
 
 class QuizNovaApp(App):
     def build(self):
+        # एंड्रॉयड पर AdMob शुरू करना
+        if KIVMOB_AVAILABLE:
+            self.ads = KivMob(ADMOB_APP_ID)
+            self.ads.new_interstitial(INTERSTITIAL_AD_ID)
+            self.ads.request_interstitial()
+        else:
+            self.ads = None
+
         sm = ScreenManager()
         sm.add_widget(LogoScreen(name='logo'))
         sm.add_widget(ProfileScreen(name='profile'))
@@ -433,10 +451,23 @@ class QuizNovaApp(App):
         return sm
 
     def show_three_ads(self):
+        # 3 विज्ञापन दिखाने का लॉजिक (असली और नकली दोनों सपोर्ट के साथ)
         print("[ADS LOG]: --- AD BLOCK START ---")
-        print("[ADS LOG]: Ad 1 Triggered successfully.")
-        print("[ADS LOG]: Ad 2 Triggered successfully.")
-        print("[ADS LOG]: Ad 3 Triggered successfully.")
+        
+        for i in range(1, 4):
+            if self.ads and KIVMOB_AVAILABLE:
+                # मोबाइल पर असली विज्ञापन दिखाना और नया विज्ञापन लोड करना
+                if self.ads.is_interstitial_loaded():
+                    self.ads.show_interstitial()
+                    self.ads.request_interstitial() # अगले ऐड के लिए लोड करना
+                    print(f"[ADS LOG]: Real Ad {i} Displayed on Mobile.")
+                else:
+                    self.ads.request_interstitial()
+                    print(f"[ADS LOG]: Real Ad {i} requested (Not loaded yet).")
+            else:
+                # कंप्यूटर/डेस्कटॉप पर नकली (Mock) एड प्रिंट होगा ताकि एरर न आए
+                print(f"[ADS LOG]: Ad {i} Triggered successfully (Desktop Sim mode).")
+                
         print("[ADS LOG]: --- AD BLOCK END ---")
 
 
