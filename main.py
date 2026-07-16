@@ -16,17 +16,22 @@ from kivy.clock import Clock
 from kivy.utils import platform
 from kivy.metrics import dp
 
-# कंप्यूटर और एंड्रॉयड दोनों के लिए सही रास्ता (Path) सेट करना
+# डेस्कटॉप/कंप्यूटर के लिए विंडो साइज (मोबाइल पर यह ऑटो-एडजस्ट होगा)
+if platform not in ('android', 'ios'):
+    Window.size = (450, 750)
+
+# कंप्यूटर और एंड्रॉयड दोनों के लिए सही फाइल पाथ (Path) सेट करना
 if platform == 'android':
     from android.storage import app_storage_dir
     BASE_DIR = app_storage_dir()
 else:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+SRC_DIR = os.path.dirname(os.path.abspath(__file__))
 SAVE_FILE = os.path.join(BASE_DIR, "quiznova_save.json")
 
 USER_DATA = {
-    "name": "Guest",
+    "name": "",
     "scores": {str(i): {"best": 0, "last": 0} for i in range(1, 22)}
 }
 
@@ -52,10 +57,11 @@ def save_game_data():
 class LogoScreen(Screen):
     def on_enter(self):
         load_game_data()
-        Clock.schedule_once(self.go_to_profile, 2.5)
+        # आपके प्लान के मुताबिक ठीक 3.5 सेकंड का लोगो टाइमर
+        Clock.schedule_once(self.go_to_profile, 3.5)
 
     def go_to_profile(self, dt):
-        if USER_DATA["name"] != "Guest" and USER_DATA["name"].strip() != "":
+        if USER_DATA["name"].strip() != "":
             self.manager.get_screen('menu').refresh_levels()
             self.manager.current = 'menu'
         else:
@@ -67,7 +73,7 @@ class ProfileScreen(Screen):
         super().__init__(**kwargs)
         layout = BoxLayout(orientation='vertical', padding=dp(30), spacing=dp(20))
         
-        logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logo.png")
+        logo_path = os.path.join(SRC_DIR, "logo.png")
         if os.path.exists(logo_path):
             layout.add_widget(Image(source=logo_path, size_hint_y=0.3, fit_mode='contain'))
         else:
@@ -104,10 +110,9 @@ class ProfileScreen(Screen):
     def save_profile(self, instance):
         if self.name_input.text.strip():
             USER_DATA["name"] = self.name_input.text.strip()
-        
-        save_game_data()
-        self.manager.get_screen('menu').refresh_levels()
-        self.manager.current = 'menu'
+            save_game_data()
+            self.manager.get_screen('menu').refresh_levels()
+            self.manager.current = 'menu'
 
 
 class MenuScreen(Screen):
@@ -232,9 +237,7 @@ class QuizScreen(Screen):
         self.level_num = level_num
         self.options_layout.clear_widgets()
         
-        # एंड्रॉयड इंटरनल एसेट पाथ को सही से हैंडल करना
-        src_dir = os.path.dirname(os.path.abspath(__file__))
-        file_path = os.path.join(src_dir, "levels", f"level{level_num}.json")
+        file_path = os.path.join(SRC_DIR, "levels", f"level{level_num}.json")
         
         if not os.path.exists(file_path):
             self.question_label.text = f"⚠️ File Missing! Level JSON not found."
@@ -292,7 +295,7 @@ class QuizScreen(Screen):
             self.info_label.text = "🎉 Level Completed!"
             self.question_label.text = f"🏆 MATCH OVER! 🏆\n\nYour Score: {self.score} / 20\nRating: {stars}"
             
-            App.get_running_app().show_interstitial_ad()
+            App.get_running_app().show_three_ads()
             
             home_btn = Button(text="Back to Levels Menu", font_size='18sp', background_color=(0.1, 0.5, 0.8, 1), background_normal='')
             home_btn.bind(on_release=self.go_back)
@@ -334,14 +337,15 @@ class QuizScreen(Screen):
     def next_question(self, dt):
         self.current_q_index += 1
         
-        if self.questions_answered_count % 5 == 0 and self.current_q_index < len(self.questions):
-            App.get_running_app().show_interstitial_ad()
+        # आपके प्लान के मुताबिक: हर 3 सवालों के बाद 3 विज्ञापन (Ads) का ट्रिगर
+        if self.questions_answered_count % 3 == 0 and self.current_q_index < len(self.questions):
+            App.get_running_app().show_three_ads()
             
         self.show_question()
 
     def go_back(self, instance):
         self.stop_timer()
-        App.get_running_app().show_interstitial_ad()
+        App.get_running_app().show_three_ads()
         self.manager.get_screen('menu').refresh_levels()
         self.manager.current = 'menu'
 
@@ -428,8 +432,13 @@ class QuizNovaApp(App):
         sm.add_widget(CertificateScreen(name='certificate'))
         return sm
 
-    def show_interstitial_ad(self):
-        print("[ADS]: Every 5th question completed. Ad trigger point reached successfully.")
+    def show_three_ads(self):
+        # 3 एड्स लगाने का सिस्टम
+        print("[ADS LOG]: --- AD BLOCK START ---")
+        print("[ADS LOG]: Ad 1 Triggered successfully.")
+        print("[ADS LOG]: Ad 2 Triggered successfully.")
+        print("[ADS LOG]: Ad 3 Triggered successfully.")
+        print("[ADS LOG]: --- AD BLOCK END ---")
 
 
 if __name__ == '__main__':
