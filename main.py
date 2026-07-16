@@ -30,6 +30,7 @@ else:
 SRC_DIR = os.path.dirname(os.path.abspath(__file__))
 SAVE_FILE = os.path.join(BASE_DIR, "quiznova_save.json")
 
+# हर लेवल का फुल स्कोर अब 50 के हिसाब से सेट होगा
 USER_DATA = {
     "name": "",
     "scores": {str(i): {"best": 0, "last": 0} for i in range(1, 22)}
@@ -57,7 +58,7 @@ def save_game_data():
 class LogoScreen(Screen):
     def on_enter(self):
         load_game_data()
-        # आपके प्लान के मुताबिक ठीक 3.5 सेकंड का लोगो टाइमर
+        # ठीक 3.5 सेकंड का लोगो टाइमर
         Clock.schedule_once(self.go_to_profile, 3.5)
 
     def go_to_profile(self, dt):
@@ -156,8 +157,9 @@ class MenuScreen(Screen):
             best_s = USER_DATA["scores"][str(i)]["best"]
             last_s = USER_DATA["scores"][str(i)]["last"]
             
+            # अब स्कोर 20 के बजाय /50 दिखेगा
             score_lbl = Label(
-                text=f"Best: {best_s}/20\nLast: {last_s}/20",
+                text=f"Best: {best_s}/50\nLast: {last_s}/50",
                 font_size='14sp',
                 color=(0.8, 0.8, 0.8, 1),
                 halign='center',
@@ -188,10 +190,11 @@ class MenuScreen(Screen):
         for l in range(1, 22):
             level_best = USER_DATA["scores"][str(l)]["best"]
             total_score_achieved += level_best
-            if level_best < 20:
+            if level_best < 50:
                 has_won_all = False
         
-        if has_won_all and total_score_achieved == 420:
+        # 21 लेवल्स * 50 सवाल = 1050 कुल स्कोर होना चाहिए जीतने के लिए
+        if has_won_all and total_score_achieved == 1050:
             self.manager.current = 'certificate'
         else:
             lock_screen = self.manager.get_screen('certificate_lock')
@@ -206,7 +209,7 @@ class QuizScreen(Screen):
         
         header_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=dp(40))
         self.info_label = Label(text="", font_size='15sp', color=(1, 0.8, 0.2, 1), halign='left')
-        self.timer_label = Label(text="⏳ 15s", font_size='15sp', bold=True, color=(1, 0.3, 0.3, 1), halign='right')
+        self.timer_label = Label(text="⏳ 5s", font_size='15sp', bold=True, color=(1, 0.3, 0.3, 1), halign='right')
         header_box.add_widget(self.info_label)
         header_box.add_widget(self.timer_label)
         self.layout.add_widget(header_box)
@@ -228,7 +231,7 @@ class QuizScreen(Screen):
         self.current_q_index = 0
         self.score = 0
         self.level_num = 1
-        self.time_left = 15
+        self.time_left = 5  # टाइमर 5 सेकंड सेट किया
         self.timer_event = None
         self.clickable = True  
         self.questions_answered_count = 0  
@@ -246,8 +249,9 @@ class QuizScreen(Screen):
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 self.questions = json.load(f)
-            if len(self.questions) > 20:
-                self.questions = random.sample(self.questions, 20)
+            # आपके प्लान के मुताबिक: अब हर लेवल में 50 सवाल लोड होंगे
+            if len(self.questions) > 50:
+                self.questions = random.sample(self.questions, 50)
             self.current_q_index = 0
             self.score = 0
             self.questions_answered_count = 0  
@@ -264,7 +268,8 @@ class QuizScreen(Screen):
         
         if self.current_q_index < len(self.questions):
             q_data = self.questions[self.current_q_index]
-            self.info_label.text = f"🏅 Lvl {self.level_num} | Q: {self.current_q_index + 1}/20 | Score: {self.score}"
+            # यहाँ भी कुल स्कोर 50 में से दिखेगा
+            self.info_label.text = f"🏅 Lvl {self.level_num} | Q: {self.current_q_index + 1}/50 | Score: {self.score}"
             self.question_label.text = q_data["question"]
             
             options = list(q_data["options"])
@@ -274,7 +279,7 @@ class QuizScreen(Screen):
                 btn.bind(on_release=self.check_answer)
                 self.options_layout.add_widget(btn)
                 
-            self.time_left = 15
+            self.time_left = 5  # हर नए सवाल के लिए 5 सेकंड रीसेट
             self.timer_label.text = f"⏳ {self.time_left}s"
             self.timer_event = Clock.schedule_interval(self.update_timer, 1.0)
         else:
@@ -286,14 +291,14 @@ class QuizScreen(Screen):
             save_game_data()
             
             stars = "⭐"
-            if self.score >= 18:
+            if self.score >= 45:
                 stars = "⭐⭐⭐"
-            elif self.score >= 12:
+            elif self.score >= 30:
                 stars = "⭐⭐"
                 
             self.timer_label.text = ""
             self.info_label.text = "🎉 Level Completed!"
-            self.question_label.text = f"🏆 MATCH OVER! 🏆\n\nYour Score: {self.score} / 20\nRating: {stars}"
+            self.question_label.text = f"🏆 MATCH OVER! 🏆\n\nYour Score: {self.score} / 50\nRating: {stars}"
             
             App.get_running_app().show_three_ads()
             
@@ -337,7 +342,7 @@ class QuizScreen(Screen):
     def next_question(self, dt):
         self.current_q_index += 1
         
-        # आपके प्लान के मुताबिक: हर 3 सवालों के बाद 3 विज्ञापन (Ads) का ट्रिगर
+        # हर 3 सवालों के बाद 3 विज्ञापन (Ads) का ट्रिगर
         if self.questions_answered_count % 3 == 0 and self.current_q_index < len(self.questions):
             App.get_running_app().show_three_ads()
             
@@ -364,12 +369,12 @@ class CertificateLockScreen(Screen):
         self.add_widget(self.layout)
 
     def update_status(self, current_total):
-        questions_left = 420 - current_total
+        questions_left = 1050 - current_total
         self.status_lbl.text = (
             f"🔒 CERTIFICATE LOCKED 🔒\n\n"
             f"Hey {USER_DATA['name']},\n"
-            f"सर्टिफिकेट और ₹2,000 जीतने के लिए आपको सभी 21 लेवल्स में पूरे 20/20 सवाल सही करने होंगे!\n\n"
-            f"🎯 आपका मौजूदा कुल स्कोर: {current_total} / 420\n"
+            f"सर्टिफिकेट और ₹2,000 जीतने के लिए आपको सभी 21 लेवल्स में पूरे 50/50 सवाल सही करने होंगे!\n\n"
+            f"🎯 आपका मौजूदा कुल स्कोर: {current_total} / 1050\n"
             f"⏳ आपको अभी {questions_left} और सही सवालों की आवश्यकता है।"
         )
 
@@ -412,7 +417,7 @@ class CertificateScreen(Screen):
     def claim_reward(self, instance):
         email_id = "your_email@gmail.com"
         subject = f"Quiznova Winner Reward Claim - {USER_DATA['name']}"
-        body = f"Hello, I have successfully completed all 21 levels of Quiznova with a perfect 20/20 score! My registered name is {USER_DATA['name']}. Please review my attached screenshot for the ₹2,000 prize."
+        body = f"Hello, I have successfully completed all 21 levels of Quiznova with a perfect 50/50 score! My registered name is {USER_DATA['name']}. Please review my attached screenshot for the ₹2,000 prize."
         
         url = f"mailto:{email_id}?subject={subject.replace(' ', '%20')}&body={body.replace(' ', '%20')}"
         webbrowser.open(url)
@@ -433,7 +438,6 @@ class QuizNovaApp(App):
         return sm
 
     def show_three_ads(self):
-        # 3 एड्स लगाने का सिस्टम
         print("[ADS LOG]: --- AD BLOCK START ---")
         print("[ADS LOG]: Ad 1 Triggered successfully.")
         print("[ADS LOG]: Ad 2 Triggered successfully.")
