@@ -21,11 +21,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install --upgrade buildozer cython virtualenv
 
-    # 🔧 यहाँ हमने पुरानी 32-bit (:i386) और अनुपलब्ध लाइब्रेरीज़ को हटा दिया है
+    # 🔧 यहाँ से हमने उस गलत 'unused-play-services' को पूरी तरह हटा दिया है
     - name: Install Android SDK/NDK dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y git zip unzip colordiff unused-play-services libstdc++6 python3-pip build-essential libltdl-dev libffi-dev libssl-dev
+        sudo apt-get install -y git zip unzip colordiff libstdc++6 python3-pip build-essential libltdl-dev libffi-dev libssl-dev
         sudo apt-get install -y openjdk-17-jdk
         echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
 
