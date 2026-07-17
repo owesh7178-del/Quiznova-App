@@ -1,68 +1,38 @@
-[app]
+name: Build APK
 
-# (str) Title of your application
-title = Quiznova
+on:
+  workflow_dispatch:
 
-# (str) Package name
-package.name = quiznova
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-# (str) Package domain (needed for android packaging)
-package.domain = com.quiznova.app
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-# (str) Source code directory where main.py is located
-source.dir = .
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
 
-# (list) Source files to include (let empty to include all the files)
-source.include_exts = py,png,jpg,kv,atlas,json
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install --upgrade buildozer cython virtualenv
 
-# (str) Supported orientations (one of landscape, sensorLandscape, portrait or all)
-orientation = portrait
+    - name: Install Android SDK/NDK dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ccache libncurses5:i386 libstdc++6:i386 libgtk2.0-0:i386 libpangox-1.0-0:i386 libpangoxft-1.0-0:i386 libidn11:i386 python3-dev
+        sudo apt-get install -y openjdk-17-jdk
+        echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
 
-# (list) Permissions required by the app (Internet is must for Ads)
-android.permissions = INTERNET, ACCESS_NETWORK_STATE
+    # 🧹 यह स्टेप पुराने जंग खाए हुए टूल्स को साफ़ कर देगा
+    - name: Clean Buildozer Cache
+      run: |
+        buildozer android clean || true
 
-# (str) Application version
-version = 1.0
-
-# (list) Application requirements
-requirements = python3==3.11.5, kivy==2.3.0, kivmob, pyjnius, jnius
-
-# (str) Supported platforms
-target = android
-
-# ----------------------------------
-# Android specific configurations
-# ----------------------------------
-
-# (int) Android API to use
-android.api = 33
-
-# (int) Minimum API your APK will support
-android.minapi = 21
-
-# (str) Android NDK version to use (⚠️ क्रैश से बचने के लिए इसे r25c पर लॉक किया है)
-android.ndk = 25c
-
-# (int) Android NDK API to use
-android.ndk_api = 21
-
-# (list) Gradle dependencies (Google Play Services for Ads)
-android.gradle_dependencies = 'com.google.android.gms:play-services-ads:22.6.0'
-
-# (list) Packaging options for gradle
-android.add_compile_options = "sourceCompatibility = JavaVersion.VERSION_1_8", "targetCompatibility = JavaVersion.VERSION_1_8"
-
-# (list) Android manifest extra elements (AdMob App ID configuration)
-android.manifest_metadata = meta-data:com.google.android.gms.ads.APPLICATION_ID=ca-app-pub-3940256099942544~3347511713
-
-# ----------------------------------
-# Buildozer settings
-# ----------------------------------
-
-[buildozer]
-
-# (int) Log level (0 = error only, 1 = info, 2 = debug (with command output))
-log_level = 2
-
-# (int) Display warning if buildozer is run as root (0 = False, 1 = True)
-warn_on_root = 1
+    - name: Build APK with Buildozer
+      run: |
+        buildozer android debug
