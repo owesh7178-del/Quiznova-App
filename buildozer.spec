@@ -25,7 +25,6 @@ android.permissions = INTERNET, ACCESS_NETWORK_STATE
 version = 1.0
 
 # (list) Application requirements
-# ⚠️ यहाँ हमने Python 3.11.5 को फिक्स कर दिया है ताकि GitHub लेटेस्ट 3.14 बीटा वर्जन न उठाए
 requirements = python3==3.11.5, kivy==2.3.0, kivmob, pyjnius, jnius
 
 # (str) Supported platforms
@@ -35,11 +34,17 @@ target = android
 # Android specific configurations
 # ----------------------------------
 
-# (int) Android API to use (33 or 34 is highly recommended)
+# (int) Android API to use
 android.api = 33
 
 # (int) Minimum API your APK will support
 android.minapi = 21
+
+# (str) Android NDK version to use (⚠️ क्रैश से बचने के लिए इसे r25c पर लॉक किया है)
+android.ndk = 25c
+
+# (int) Android NDK API to use
+android.ndk_api = 21
 
 # (list) Gradle dependencies (Google Play Services for Ads)
 android.gradle_dependencies = 'com.google.android.gms:play-services-ads:22.6.0'
