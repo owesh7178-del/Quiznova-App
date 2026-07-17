@@ -21,7 +21,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install --upgrade buildozer cython virtualenv
 
-    # 🔧 यहाँ से हमने उस गलत 'unused-play-services' को पूरी तरह हटा दिया है
     - name: Install Android SDK/NDK dependencies
       run: |
         sudo apt-get update
