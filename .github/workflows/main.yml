@@ -27,14 +27,24 @@ jobs:
         sudo apt-get install -y git zip unzip colordiff libstdc++6 python3-pip build-essential libltdl-dev libffi-dev libssl-dev openjdk-17-jdk
         echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
 
-    # 🔒 [THE MASTER PATCH] Buildozer की फाइल के अंदर पुराने पाथ को नए पाथ से रिप्लेस करना
-    - name: Patch Buildozer SDK Path Bug
-      run: |
-        BUILDOZER_TARGET_FILE=$(python -c "import buildozer.targets.android as android; print(android.__file__)")
-        echo "Patching file: $BUILDOZER_TARGET_FILE"
-        sed -i 's|tools/bin/sdkmanager|cmdline-tools/latest/bin/sdkmanager|g' "$BUILDOZER_TARGET_FILE"
+    # 🤖 गिटहब के ऑफिशियल एंड्रॉइड एनवायरनमेंट को एक्टिवेट करना
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
 
-    # 🚀 सीधा और साफ बिल्ड कमांड
+    # 🔒 गिटहब रनर के सारे लाइसेंस को एक बार में एडवांस में एक्सेप्ट करना
+    - name: Accept Android Licenses
+      run: |
+        yes | sdkmanager --licenses || true
+        sdkmanager "build-tools;33.0.0" "platform-tools" "platforms;android-33" || true
+
+    # 🚀 [THE MASTER FIX] Buildozer को गिटहब के रेडीमेड और लाइसेंस्ड SDK को इस्तेमाल करने के लिए मजबूर करना
     - name: Build APK with Buildozer
       run: |
+        export ANDROID_HOME=$ANDROID_HOME
+        export ANDROID_SDK_ROOT=$ANDROID_HOME
+        # Buildozer को उसके डिफ़ॉल्ट डाउनलोड पाथ पर गिटहब के SDK से लिंक करना
+        mkdir -p ~/.buildozer/android/platform
+        ln -sf $ANDROID_HOME ~/.buildozer/android/platform/android-sdk
+        
+        # बिल्ड कमांड
         buildozer android debug
