@@ -25,14 +25,20 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y git zip unzip colordiff libstdc++6 python3-pip build-essential libltdl-dev libffi-dev libssl-dev openjdk-17-jdk
-        echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
 
-    # 🔒 [अचूक फिक्स] Buildozer के चलने से पहले ही उसके घर में घुसकर 33, 34, 35, 36, 37 सारे लाइसेंस पहले ही अप्रूव कर देना
-    - name: Pre-accept All Possible Android Licenses
+    # 🤖 गिटहब के ऑफिशियल एंड्रॉइड एनवायरनमेंट को लोड करना
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
+    # 📜 सारे लाइसेंस को पहले ही ऑटो-एक्सेप्ट करना
+    - name: Accept Android Licenses
       run: |
-        mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
-        echo -e "\n244d242542139071b2c65f08b8a3743c48e8e7c3\nd56f5187479451eabf01fb743130282b5d210a2e\n26466f859b3d67421e115653161941ea130c15a0\n84831b9409646a918e30573bab4c9c91346d8abd\n65ce501d265d5d992926497ff96111ac171d6e7d\nb78169a34e7297f47d3d27e992be354c35341458" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+        yes | sdkmanager --licenses || true
 
+    # 🚀 Buildozer को गिटहब के पहले से तैयार SDK और सही sdkmanager का रास्ता देना
     - name: Build APK with Buildozer
       run: |
+        export ANDROIDSDK=$ANDROID_HOME
+        export ANDROIDNDK=$ANDROID_HOME/ndk/25.2.9519653
+        export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
         buildozer android debug
