@@ -28,12 +28,9 @@ jobs:
         sudo apt-get install -y openjdk-17-jdk
         echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
 
-    # 📜 🔑 यह कमांड एंड्रॉइड के सभी लाइसेंस को ऑटोमैटिकली स्वीकार (Accept) कर लेगी
-    - name: Accept Android SDK Licenses
-      run: |
-        mkdir -p ~/.android
-        touch ~/.android/repositories.cfg
-        yes | sdkmanager --licenses || true
+    # 🛡️ यह गिटहब का ऑफिशियल टूल है जो सारे एंड्रॉइड लाइसेंस खुद ही अप्रूव कर देगा
+    - name: Setup Android SDK and Accept Licenses
+      uses: android-actions/setup-android@v3
 
     - name: Clean Buildozer Cache
       run: |
