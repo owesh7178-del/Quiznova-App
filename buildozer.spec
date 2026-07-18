@@ -34,10 +34,10 @@ target = android
 # Android specific configurations
 # ----------------------------------
 
-# (str) गिटहब रनर का ऑफिशियल SDK पाथ (Buildozer का अपना डाउनलोड बंद करने के लिए)
+# गिटहब रनर का ऑफिशियल SDK पाथ
 android.sdk_path = /usr/local/lib/android/sdk
 
-# (str) गिटहब रनर का ऑफिशियल NDK पाथ
+# गिटहब रनर का ऑफिशियल NDK पाथ
 android.ndk_path = /usr/local/lib/android/sdk/ndk/27.3.13750724
 
 # (int) Android API to use (Target SDK)
