@@ -24,7 +24,7 @@ android.permissions = INTERNET, ACCESS_NETWORK_STATE
 # (str) Application version
 version = 1.0
 
-# 🔒 [THE PYTHON COMPILING FIX] पाइथन वर्जन को एंड्रॉइड के लिए 3.11 पर लॉक करना
+# 🔒 एंड्रॉइड के लिए पाइथन को 3.11 पर लॉक रखा है
 requirements = python3==3.11.1, kivy==2.3.0, kivmob, pyjnius, jnius
 
 # (str) Supported platforms
@@ -34,16 +34,15 @@ target = android
 # Android specific configurations
 # ----------------------------------
 
-# गिटहब रनर का ऑफिशियल SDK पाथ
+# गिटहब रनर का ऑफिशियल SDK पाथ (यह ठीक काम कर रहा है)
 android.sdk_path = /usr/local/lib/android/sdk
 
-# गिटहब रनर का ऑफिशियल NDK पाथ
-android.ndk_path = /usr/local/lib/android/sdk/ndk/27.3.13750724
-
-# (int) Android API to use (Target SDK)
+# 🔒 [THE NDK COMPILATION FIX] 
+# हमने यहाँ से NDK पाथ हटा दिया है ताकि Buildozer खुद स्टेबल NDK 25c डाउनलोड करे।
+# इसके अलावा NDK और API वर्शन्स को स्टेबल पॉइंट पर लॉक कर दिया है:
+android.ndk = 25c
+android.ndk_api = 21
 android.api = 33
-
-# (int) Minimum API your APK will support
 android.minapi = 21
 
 # (list) Gradle dependencies (Google Play Services for Ads/Kivmob)
