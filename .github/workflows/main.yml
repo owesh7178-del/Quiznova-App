@@ -28,16 +28,11 @@ jobs:
         sudo apt-get install -y openjdk-17-jdk
         echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
 
-    # 🔧 [FIX] यह गिटहब रनर में sdkmanager को बिल्कुल सही पाथ पर सेटअप कर देगा
-    - name: Setup Android SDK Tools
-      uses: android-actions/setup-android@v3
-
-    # 📜 एंड्रॉइड के सभी नए लाइसेंस पहले ही अप्रूव कर दें
-    - name: Pre-accept SDK Licenses
+    # 🔒 Buildozer की डायरेक्टरी शुरू होने से पहले ही लाइसेंस फाइल को इन्जेक्ट करना
+    - name: Pre-accept Buildozer Licenses
       run: |
-        mkdir -p ~/.android
-        touch ~/.android/repositories.cfg
-        yes | sdkmanager --licenses || true
+        mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+        echo -e "\n244d242542139071b2c65f08b8a3743c48e8e7c3\nd56f5187479451eabf01fb743130282b5d210a2e\n26466f859b3d67421e115653161941ea130c15a0" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
 
     - name: Build APK with Buildozer
       run: |
