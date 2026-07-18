@@ -27,7 +27,19 @@ jobs:
         sudo apt-get install -y git zip unzip colordiff libstdc++6 python3-pip build-essential libltdl-dev libffi-dev libssl-dev openjdk-17-jdk
         echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
 
-    # 🔒 [THE MASTER FIX] यह कमांड Buildozer के लाइसेंस मांगते ही खुद ऑटोमैटिक 'Yes' दबा देगी!
+    # 🤖 गिटहब के अपने ऑफिशियल एंड्रॉइड टूल्स को एक्टिवेट करना
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
+    # 🔒 [THE ULTRA FIX] यह कमांड 'Build-Tools 37' समेत सभी नए-पुराने लाइसेंस को एक बार में सही तरीके से अप्रूव कर देगी
+    - name: Accept All Android SDK Licenses
+      run: |
+        yes | sdkmanager --licenses || true
+
+    # 🚀 Buildozer को गिटहब के इसी रेडीमेड SDK और टूल्स का रास्ता देकर बिल्ड करना
     - name: Build APK with Buildozer
       run: |
-        yes | buildozer android debug
+        export ANDROIDSDK=$ANDROID_HOME
+        export ANDROIDNDK=$ANDROID_HOME/ndk/25.2.9519653
+        export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
+        buildozer android debug
