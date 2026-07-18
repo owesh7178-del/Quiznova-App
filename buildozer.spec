@@ -24,8 +24,8 @@ android.permissions = INTERNET, ACCESS_NETWORK_STATE
 # (str) Application version
 version = 1.0
 
-# (list) Application requirements
-requirements = python3, kivy==2.3.0, kivmob, pyjnius, jnius
+# 🔒 [THE PYTHON COMPILING FIX] पाइथन वर्जन को एंड्रॉइड के लिए 3.11 पर लॉक करना
+requirements = python3==3.11.1, kivy==2.3.0, kivmob, pyjnius, jnius
 
 # (str) Supported platforms
 target = android
