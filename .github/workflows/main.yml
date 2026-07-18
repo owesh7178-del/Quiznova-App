@@ -27,11 +27,25 @@ jobs:
         sudo apt-get install -y git zip unzip colordiff libstdc++6 python3-pip build-essential libltdl-dev libffi-dev libssl-dev openjdk-17-jdk
         echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
 
-    # 🚀 Buildozer को सीधा गिटहब रनर का रेडीमेड SDK और NDK पाथ पास करना
+    # 🔒 [THE MASTER STRIKE] गिटहब SDK के अंदर पुराने टूल्स का नकली रास्ता (Symlink) बनाना ताकि वो क्रैश न हो
+    - name: Fix Android SDK Tools Path Bug
+      run: |
+        # गिटहब के SDK के अंदर पुराना 'tools/bin' का स्ट्रक्चर क्रिएट करना
+        sudo mkdir -p /usr/local/lib/android/sdk/tools/bin
+        
+        # नए cmdline-tools वाले sdkmanager को पुराने पाथ से लिंक कर देना
+        if [ -f "/usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager" ]; then
+          sudo ln -sf /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager /usr/local/lib/android/sdk/tools/bin/sdkmanager
+        elif [ -f "/usr/local/lib/android/sdk/cmdline-tools/16.0/bin/sdkmanager" ]; then
+          sudo ln -sf /usr/local/lib/android/sdk/cmdline-tools/16.0/bin/sdkmanager /usr/local/lib/android/sdk/tools/bin/sdkmanager
+        fi
+        
+        # सभी लाइसेंस को एक बार में एडवांस में एक्सेप्ट करना
+        yes | sdkmanager --licenses || true
+
+    # 🚀 बिल्ड कमांड रन करना
     - name: Build APK with Buildozer
       run: |
         export ANDROID_HOME=/usr/local/lib/android/sdk
         export ANDROID_NDK_HOME=/usr/local/lib/android/sdk/ndk/27.3.13750724
-        
-        # बिल्ड कमांड
         buildozer android debug
