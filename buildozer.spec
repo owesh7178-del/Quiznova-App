@@ -34,20 +34,17 @@ target = android
 # Android specific configurations
 # ----------------------------------
 
+# (str) गिटहब रनर का ऑफिशियल SDK पाथ (Buildozer का अपना डाउनलोड बंद करने के लिए)
+android.sdk_path = /usr/local/lib/android/sdk
+
+# (str) गिटहब रनर का ऑफिशियल NDK पाथ
+android.ndk_path = /usr/local/lib/android/sdk/ndk/27.3.13750724
+
 # (int) Android API to use (Target SDK)
 android.api = 33
 
 # (int) Minimum API your APK will support
 android.minapi = 21
-
-# (str) Android NDK version to use (स्टेबल वर्जन)
-android.ndk = 25c
-
-# (int) Android NDK API to use
-android.ndk_api = 21
-
-# 🔒 बिल्ड टूल्स को 33.0.0 पर पूरी तरह लॉक रखा है
-android.build_tools_version = 33.0.0
 
 # (list) Gradle dependencies (Google Play Services for Ads/Kivmob)
 android.gradle_dependencies = 'com.google.android.gms:play-services-ads:22.6.0'
