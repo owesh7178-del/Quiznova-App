@@ -25,7 +25,6 @@ android.permissions = INTERNET, ACCESS_NETWORK_STATE
 version = 1.0
 
 # (list) Application requirements 
-# ⚠️ हमने यहाँ python3==3.11.5 हटाकर सामान्य 'python3' कर दिया है जैसा आपने कहा
 requirements = python3, kivy==2.3.0, kivmob, pyjnius, jnius
 
 # (str) Supported platforms
@@ -41,11 +40,14 @@ android.api = 33
 # (int) Minimum API your APK will support
 android.minapi = 21
 
-# (str) Android NDK version to use (स्टेबल वर्जन लॉक किया है ताकि क्रैश न हो)
+# (str) Android NDK version to use
 android.ndk = 25c
 
 # (int) Android NDK API to use
 android.ndk_api = 21
+
+# 🔒 [MASTER FIX] Build-tools को 33.0.0 पर लॉक किया ताकि यह 'Build-Tools 37' का लाइसेंस न मांगे
+android.build_tools_version = 33.0.0
 
 # (list) Gradle dependencies (Google Play Services for Ads)
 android.gradle_dependencies = 'com.google.android.gms:play-services-ads:22.6.0'
@@ -53,7 +55,7 @@ android.gradle_dependencies = 'com.google.android.gms:play-services-ads:22.6.0'
 # (list) Packaging options for gradle
 android.add_compile_options = "sourceCompatibility = JavaVersion.VERSION_1_8", "targetCompatibility = JavaVersion.VERSION_1_8"
 
-# (list) Android manifest extra elements (AdMob App ID configuration - Test App ID)
+# (list) Android manifest extra elements (AdMob App ID configuration)
 android.manifest_metadata = meta-data:com.google.android.gms.ads.APPLICATION_ID=ca-app-pub-3940256099942544~3347511713
 
 # ----------------------------------
