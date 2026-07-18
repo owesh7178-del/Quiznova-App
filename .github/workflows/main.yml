@@ -28,9 +28,13 @@ jobs:
         sudo apt-get install -y openjdk-17-jdk
         echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
 
-    # 🛡️ यह ऑफिशियल टूल सारे एंड्रॉइड लाइसेंस खुद ही अप्रूव कर देगा ताकि एरर न आए
-    - name: Setup Android SDK and Accept Licenses
-      uses: android-actions/setup-android@v3
+    # 🛠️ [MASTER FIX] यह कमांड Buildozer के घर के अंदर घुसकर सारे लाइसेंस को पहले ही 'Yes' कर देगी!
+    - name: Pre-accept Buildozer Android Licenses
+      run: |
+        mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+        echo -e "\n244d242542139071b2c65f08b8a3743c48e8e7c3\nd56f5187479451eabf01fb743130282b5d210a2e\n26466f859b3d67421e115653161941ea130c15a0" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+        echo -e "\n84831b9409646a918e30573bab4c9c91346d8abd" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-preview-license
+        echo -e "\n65ce501d265d5d992926497ff96111ac171d6e7d" > ~/.buildozer/android/platform/android-sdk/licenses/android-googletv-license
 
     - name: Clean Buildozer Cache
       run: |
