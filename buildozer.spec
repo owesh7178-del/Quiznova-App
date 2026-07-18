@@ -46,7 +46,7 @@ android.ndk = 25c
 # (int) Android NDK API to use
 android.ndk_api = 21
 
-# 🔒 बिल्ड टूल्स को 33.0.0 पर पूरी तरह लॉक रखा है
+# 🔒 बिल्ड टूल्स को 33.0.0 पर लॉक रखा है
 android.build_tools_version = 33.0.0
 
 # (list) Gradle dependencies (Google Play Services for Ads/Kivmob)
