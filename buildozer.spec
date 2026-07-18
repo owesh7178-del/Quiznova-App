@@ -18,13 +18,13 @@ source.include_exts = py,png,jpg,kv,atlas,json
 # (str) Supported orientations (one of landscape, sensorLandscape, portrait or all)
 orientation = portrait
 
-# (list) Permissions required by the app (Internet is must for Ads)
+# (list) Permissions required by the app (Internet & Network state are must for Ads)
 android.permissions = INTERNET, ACCESS_NETWORK_STATE
 
 # (str) Application version
 version = 1.0
 
-# (list) Application requirements 
+# (list) Application requirements
 requirements = python3, kivy==2.3.0, kivmob, pyjnius, jnius
 
 # (str) Supported platforms
@@ -34,28 +34,28 @@ target = android
 # Android specific configurations
 # ----------------------------------
 
-# (int) Android API to use
+# (int) Android API to use (Target SDK)
 android.api = 33
 
 # (int) Minimum API your APK will support
 android.minapi = 21
 
-# (str) Android NDK version to use
+# (str) Android NDK version to use (स्टेबल वर्जन ताकि क्रैश न हो)
 android.ndk = 25c
 
 # (int) Android NDK API to use
 android.ndk_api = 21
 
-# 🔒 [MASTER FIX] Build-tools को 33.0.0 पर लॉक किया ताकि यह 'Build-Tools 37' का लाइसेंस न मांगे
+# (str) Android Build Tools version to use
 android.build_tools_version = 33.0.0
 
-# (list) Gradle dependencies (Google Play Services for Ads)
+# (list) Gradle dependencies (Google Play Services for Ads/Kivmob)
 android.gradle_dependencies = 'com.google.android.gms:play-services-ads:22.6.0'
 
 # (list) Packaging options for gradle
 android.add_compile_options = "sourceCompatibility = JavaVersion.VERSION_1_8", "targetCompatibility = JavaVersion.VERSION_1_8"
 
-# (list) Android manifest extra elements (AdMob App ID configuration)
+# (list) Android manifest extra elements (AdMob App ID Configuration - Currently Test ID)
 android.manifest_metadata = meta-data:com.google.android.gms.ads.APPLICATION_ID=ca-app-pub-3940256099942544~3347511713
 
 # ----------------------------------
