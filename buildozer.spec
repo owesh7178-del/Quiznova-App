@@ -46,7 +46,7 @@ android.ndk = 25c
 # (int) Android NDK API to use
 android.ndk_api = 21
 
-# 🔒 [THE ULTIMATE FIX] इसे 33.0.0 पर लॉक किया है ताकि यह 'Build-Tools 37' डाउनलोड न करे
+# 🔒 इसे 33.0.0 पर लॉक किया है ताकि यह 'Build-Tools 37' डाउनलोड न करे
 android.build_tools_version = 33.0.0
 
 # (list) Gradle dependencies (Google Play Services for Ads/Kivmob)
