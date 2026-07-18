@@ -27,21 +27,14 @@ jobs:
         sudo apt-get install -y git zip unzip colordiff libstdc++6 python3-pip build-essential libltdl-dev libffi-dev libssl-dev openjdk-17-jdk
         echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
 
-    # 🔒 [THE FINAL SHIELD] Buildozer का पैर पड़ने से पहले ही वर्किंग टूल्स इंजेक्ट करना
-    - name: Pre-setup Working SDK Tools for Buildozer
+    # 🔒 [THE MASTER PATCH] Buildozer की फाइल के अंदर पुराने पाथ को नए पाथ से रिप्लेस करना
+    - name: Patch Buildozer SDK Path Bug
       run: |
-        mkdir -p ~/.buildozer/android/platform/android-sdk/cmdline-tools
-        cd ~/.buildozer/android/platform/android-sdk/cmdline-tools
-        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
-        unzip commandlinetools-linux-9477386_latest.zip
-        mv cmdline-tools latest
-        rm commandlinetools-linux-9477386_latest.zip
-        
-        # सभी लाइसेंस हैश को एडवांस में फोल्डर के अंदर लिखना
-        mkdir -p ../licenses
-        echo -e "\n244d242542139071b2c65f08b8a3743c48e8e7c3\nd56f5187479451eabf01fb743130282b5d210a2e\n26466f859b3d67421e115653161941ea130c15a0\n84831b9409646a918e30573bab4c9c91346d8abd" > ../licenses/android-sdk-license
+        BUILDOZER_TARGET_FILE=$(python -c "import buildozer.targets.android as android; print(android.__file__)")
+        echo "Patching file: $BUILDOZER_TARGET_FILE"
+        sed -i 's|tools/bin/sdkmanager|cmdline-tools/latest/bin/sdkmanager|g' "$BUILDOZER_TARGET_FILE"
 
-    # 🚀 सीधा और साफ बिल्ड कमांड (बिल्कुल बिना किसी रुकावट के)
+    # 🚀 सीधा और साफ बिल्ड कमांड
     - name: Build APK with Buildozer
       run: |
         buildozer android debug
