@@ -28,7 +28,7 @@ jobs:
         sudo apt-get install -y openjdk-17-jdk
         echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
 
-    # 🛡️ यह गिटहब का ऑफिशियल टूल है जो सारे एंड्रॉइड लाइसेंस खुद ही अप्रूव कर देगा
+    # 🛡️ यह ऑफिशियल टूल सारे एंड्रॉइड लाइसेंस खुद ही अप्रूव कर देगा ताकि एरर न आए
     - name: Setup Android SDK and Accept Licenses
       uses: android-actions/setup-android@v3
 
