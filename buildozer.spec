@@ -40,13 +40,13 @@ android.api = 33
 # (int) Minimum API your APK will support
 android.minapi = 21
 
-# (str) Android NDK version to use (स्टेबल वर्जन ताकि क्रैश न हो)
+# (str) Android NDK version to use (स्टेबल वर्जन)
 android.ndk = 25c
 
 # (int) Android NDK API to use
 android.ndk_api = 21
 
-# (str) Android Build Tools version to use
+# 🔒 [THE ULTIMATE FIX] इसे 33.0.0 पर लॉक किया है ताकि यह 'Build-Tools 37' डाउनलोड न करे
 android.build_tools_version = 33.0.0
 
 # (list) Gradle dependencies (Google Play Services for Ads/Kivmob)
@@ -55,7 +55,7 @@ android.gradle_dependencies = 'com.google.android.gms:play-services-ads:22.6.0'
 # (list) Packaging options for gradle
 android.add_compile_options = "sourceCompatibility = JavaVersion.VERSION_1_8", "targetCompatibility = JavaVersion.VERSION_1_8"
 
-# (list) Android manifest extra elements (AdMob App ID Configuration - Currently Test ID)
+# (list) Android manifest extra elements (AdMob App ID Configuration)
 android.manifest_metadata = meta-data:com.google.android.gms.ads.APPLICATION_ID=ca-app-pub-3940256099942544~3347511713
 
 # ----------------------------------
