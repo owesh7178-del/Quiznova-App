@@ -27,7 +27,6 @@ jobs:
         sudo apt-get install -y git zip unzip colordiff libstdc++6 python3-pip build-essential libltdl-dev libffi-dev libssl-dev openjdk-17-jdk
         echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
 
-    # 🔒 गिटहब SDK के अंदर पुराने टूल्स का पाथ फिक्स (यह पिछले एरर्स को रोकेगा)
     - name: Fix Android SDK Tools Path Bug
       run: |
         sudo mkdir -p /usr/local/lib/android/sdk/tools/bin
@@ -38,13 +37,17 @@ jobs:
         fi
         yes | sdkmanager --licenses || true
 
-    # 🚀 [THE RESET FIX] गिटहब के पुराने NDK वेरिएबल्स को साफ़ करके बिल्ड करना
     - name: Build APK with Buildozer
       run: |
         export ANDROID_HOME=/usr/local/lib/android/sdk
-        # पुराने NDK पाथ्स को हटाना ताकि Buildozer अपने डाउनलोड किए r25c को क्लीन यूज़ करे
         unset ANDROID_NDK
         unset ANDROID_NDK_HOME
         unset ANDROID_NDK_ROOT
         
         buildozer android debug
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-release
+        path: bin/*.apk
