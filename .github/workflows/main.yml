@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    # 🔒 Ubuntu 22.04 का इस्तेमाल अनिवार्य है (Ubuntu 24.04 Android NDK कंपाइलर को तोड़ता है)
+    # 🔒 Ubuntu 22.04 ही Kivy/Buildozer के लिए सबसे स्टेबल एनवायरमेंट है
     runs-on: ubuntu-22.04
 
     steps:
@@ -26,8 +26,8 @@ jobs:
     - name: Install Buildozer and Compatible Cython
       run: |
         python -m pip install --upgrade pip
-        # 🔒 Cython < 3.0.0 ही PyJNIus / Kivy C-extensions के लिए कंपैटिबल है
-        pip install "cython<3.0.0" buildozer virtualenv
+        # 🔒 Cython 0.29.33 ही p4a टूलचेन को टूटने से बचाता है
+        pip install "cython==0.29.33" buildozer virtualenv
 
     - name: Fix Android SDK Tools Path Bug
       run: |
@@ -39,14 +39,16 @@ jobs:
         fi
         yes | sdkmanager --licenses || true
 
-    - name: Build APK with Buildozer
+    - name: Clean Old Build Cache & Build APK
       run: |
         export ANDROID_HOME=/usr/local/lib/android/sdk
         unset ANDROID_NDK
         unset ANDROID_NDK_HOME
         unset ANDROID_NDK_ROOT
         
-        # पुराना कैशे साफ़ करके ताज़ा बिल्ड
+        # 🔒 पुरानी बिगड़ी हुई कैशे फाइलों को साफ करना (Super Important)
+        rm -rf .buildozer/
+        
         buildozer android debug
 
     - name: Upload APK Artifact
