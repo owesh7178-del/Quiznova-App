@@ -9,7 +9,7 @@ package.name = quiznova
 # (str) Package domain (needed for android packaging)
 package.domain = com.quiznova.app
 
-# (str) Source code directory where main.py is located
+# (str) Source code directory
 source.dir = .
 
 # (list) Source files to include
@@ -24,7 +24,7 @@ android.permissions = INTERNET, ACCESS_NETWORK_STATE
 # (str) Application version
 version = 1.0
 
-# 🔒 [STABLE REQUIREMENTS] Kivy अपने आप PyJNIus को सही तरीके से लोड कर लेता है
+# 🔒 [STABLE REQUIREMENTS] केवल python3 और kivy रखें (kivy अपने आप pyjnius मैनेज करता है)
 requirements = python3, kivy==2.3.0
 
 # (str) Supported platforms
