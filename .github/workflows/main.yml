@@ -5,7 +5,8 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # 🔒 Ubuntu 22.04 का इस्तेमाल अनिवार्य है (Ubuntu 24.04 Android NDK कंपाइलर को तोड़ता है)
+    runs-on: ubuntu-22.04
 
     steps:
     - name: Checkout code
@@ -14,18 +15,19 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.11'
+        python-version: '3.10'
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install --upgrade buildozer cython virtualenv
-
-    - name: Install Android Dependencies
+    - name: Install System Dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y git zip unzip colordiff libstdc++6 python3-pip build-essential libltdl-dev libffi-dev libssl-dev openjdk-17-jdk
         echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
+
+    - name: Install Buildozer and Compatible Cython
+      run: |
+        python -m pip install --upgrade pip
+        # 🔒 Cython < 3.0.0 ही PyJNIus / Kivy C-extensions के लिए कंपैटिबल है
+        pip install "cython<3.0.0" buildozer virtualenv
 
     - name: Fix Android SDK Tools Path Bug
       run: |
@@ -44,6 +46,7 @@ jobs:
         unset ANDROID_NDK_HOME
         unset ANDROID_NDK_ROOT
         
+        # पुराना कैशे साफ़ करके ताज़ा बिल्ड
         buildozer android debug
 
     - name: Upload APK Artifact
