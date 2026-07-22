@@ -1,60 +1,62 @@
-name: Build APK
+[app]
 
-on:
-  workflow_dispatch:
+# (str) Title of your application
+title = Quiznova
 
-jobs:
-  build:
-    runs-on: ubuntu-22.04
+# (str) Package name
+package.name = quiznova
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+# (str) Package domain
+package.domain = com.quiznova.app
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
+# (str) Source code directory
+source.dir = .
 
-    - name: Install System Dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y git zip unzip colordiff libstdc++6 python3-pip build-essential libltdl-dev libffi-dev libssl-dev openjdk-17-jdk
-        echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
+# (list) Source files to include
+source.include_exts = py,png,jpg,kv,atlas,json
 
-    - name: Install Stable Buildozer & P4A (Release Tag)
-      run: |
-        python -m pip install --upgrade pip
-        pip install "cython<3.0.0" virtualenv
-        pip install buildozer
-        # 🔒 Python 3.14 बग से बचने के लिए p4a का स्टेबल रिलीज़ वर्ज़न इंस्टॉल कर रहे हैं
-        pip install python-for-android==2024.1.21
+# (str) Supported orientations
+orientation = portrait
 
-    - name: Fix Android SDK Tools Path Bug
-      run: |
-        sudo mkdir -p /usr/local/lib/android/sdk/tools/bin
-        if [ -f "/usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager" ]; then
-          sudo ln -sf /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager /usr/local/lib/android/sdk/tools/bin/sdkmanager
-        elif [ -f "/usr/local/lib/android/sdk/cmdline-tools/16.0/bin/sdkmanager" ]; then
-          sudo ln -sf /usr/local/lib/android/sdk/cmdline-tools/16.0/bin/sdkmanager /usr/local/lib/android/sdk/tools/bin/sdkmanager
-        fi
-        yes | sdkmanager --licenses || true
+# (list) Permissions required by the app
+android.permissions = INTERNET, ACCESS_NETWORK_STATE
 
-    - name: Purge Cache & Execute Build
-      run: |
-        export ANDROID_HOME=/usr/local/lib/android/sdk
-        unset ANDROID_NDK
-        unset ANDROID_NDK_HOME
-        unset ANDROID_NDK_ROOT
-        
-        # 💣 पुराना सारा कैशे साफ़ करना
-        rm -rf .buildozer/
-        rm -rf ~/.buildozer/
-        
-        buildozer android debug
+# (str) Application version
+version = 1.0
 
-    - name: Upload APK Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: app-release
-        path: bin/*.apk
+# 🔒 Requirements Fix: 'python3' ही रहने दें ताकि hostpython3 और python3 मैच करें
+requirements = python3, kivy==2.3.0
+
+# (str) Supported platforms
+target = android
+
+# ----------------------------------
+# Android specific configurations
+# ----------------------------------
+
+# 🔒 Single Architecture
+android.archs = arm64-v8a
+
+# SDK / NDK Settings
+android.sdk_path = /usr/local/lib/android/sdk
+android.ndk = 25c
+android.ndk_api = 21
+android.api = 33
+android.minapi = 21
+
+# 🔒 p4a को फ़ोर्स करें कि वो Python 3.11.x का स्टेबल सोर्स इस्तेमाल करे
+p4a.extra_args = --python-version=3.11.9
+
+# Gradle & Ads Setup
+android.gradle_dependencies = 'com.google.android.gms:play-services-ads:22.6.0'
+android.add_compile_options = "sourceCompatibility = JavaVersion.VERSION_1_8", "targetCompatibility = JavaVersion.VERSION_1_8"
+android.manifest_metadata = meta-data:com.google.android.gms.ads.APPLICATION_ID=ca-app-pub-3940256099942544~3347511713
+
+# ----------------------------------
+# Buildozer settings
+# ----------------------------------
+
+[buildozer]
+
+log_level = 2
+warn_on_root = 1
