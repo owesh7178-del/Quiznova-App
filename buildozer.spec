@@ -24,8 +24,8 @@ android.permissions = INTERNET, ACCESS_NETWORK_STATE
 # (str) Application version
 version = 1.0
 
-# 🔒 Requirements
-requirements = python3, kivy==2.3.0
+# 🔒 [THE PERMANENT FIX] Python 3.11.9 को स्ट्रिक्टली पिन कर दिया है (यह 3.14 डाउनलोड होने से रोकेगा)
+requirements = python3==3.11.9, kivy==2.3.0
 
 # (str) Supported platforms
 target = android
@@ -34,18 +34,15 @@ target = android
 # Android specific configurations
 # ----------------------------------
 
-# 🔒 Single Architecture
+# 🔒 Single Clean Architecture
 android.archs = arm64-v8a
 
-# NDK & API Settings
+# SDK / NDK Settings
 android.sdk_path = /usr/local/lib/android/sdk
 android.ndk = 25c
 android.ndk_api = 21
 android.api = 33
 android.minapi = 21
-
-# 🛑 [THE CRITICAL FIX] p4a को ज़बरदस्ती Python 3.11 यूज़ करने पर मजबूर करना
-p4a.extra_args = --python-version=3.11.9
 
 # Gradle & Ads Setup
 android.gradle_dependencies = 'com.google.android.gms:play-services-ads:22.6.0'
