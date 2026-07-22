@@ -24,7 +24,7 @@ android.permissions = INTERNET, ACCESS_NETWORK_STATE
 # (str) Application version
 version = 1.0
 
-# 🔒 Clean Requirements
+# 🔒 Requirements Fix (kivy 2.3.0 without Python 3.14 override)
 requirements = python3, kivy==2.3.0
 
 # (str) Supported platforms
@@ -38,9 +38,14 @@ target = android
 android.archs = arm64-v8a
 
 # NDK & API Settings
+android.sdk_path = /usr/local/lib/android/sdk
+android.ndk = 25c
 android.ndk_api = 21
 android.api = 33
 android.minapi = 21
+
+# p4a fork/branch override to prevent 3.14 download
+p4a.branch = master
 
 # Gradle & Ads Setup
 android.gradle_dependencies = 'com.google.android.gms:play-services-ads:22.6.0'
