@@ -24,7 +24,7 @@ android.permissions = INTERNET, ACCESS_NETWORK_STATE
 # (str) Application version
 version = 1.0
 
-# 🔒 Requirements Fix (kivy 2.3.0 without Python 3.14 override)
+# 🔒 Requirements
 requirements = python3, kivy==2.3.0
 
 # (str) Supported platforms
@@ -44,8 +44,8 @@ android.ndk_api = 21
 android.api = 33
 android.minapi = 21
 
-# p4a fork/branch override to prevent 3.14 download
-p4a.branch = master
+# 🛑 [THE CRITICAL FIX] p4a को ज़बरदस्ती Python 3.11 यूज़ करने पर मजबूर करना
+p4a.extra_args = --python-version=3.11.9
 
 # Gradle & Ads Setup
 android.gradle_dependencies = 'com.google.android.gms:play-services-ads:22.6.0'
