@@ -24,7 +24,7 @@ android.permissions = INTERNET, ACCESS_NETWORK_STATE
 # (str) Application version
 version = 1.0
 
-# 🔒 Requirements Fix: 'python3' ही रहने दें ताकि hostpython3 और python3 मैच करें
+# 🔒 Requirements Fix: 'python3' and 'kivy'
 requirements = python3, kivy==2.3.0
 
 # (str) Supported platforms
@@ -44,7 +44,7 @@ android.ndk_api = 21
 android.api = 33
 android.minapi = 21
 
-# 🔒 p4a को फ़ोर्स करें कि वो Python 3.11.x का स्टेबल सोर्स इस्तेमाल करे
+# 🔒 Python 3.14 को रोकने के लिए p4a को 3.11.9 पर लॉक करना
 p4a.extra_args = --python-version=3.11.9
 
 # Gradle & Ads Setup
