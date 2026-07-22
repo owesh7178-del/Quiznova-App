@@ -24,7 +24,7 @@ android.permissions = INTERNET, ACCESS_NETWORK_STATE
 # (str) Application version
 version = 1.0
 
-# 🔒 Requirements Fix: 'python3' and 'kivy'
+# 🔒 Requirements Fix
 requirements = python3, kivy==2.3.0
 
 # (str) Supported platforms
@@ -34,7 +34,7 @@ target = android
 # Android specific configurations
 # ----------------------------------
 
-# 🔒 Single Architecture
+# 🔒 Architecture
 android.archs = arm64-v8a
 
 # SDK / NDK Settings
@@ -44,8 +44,8 @@ android.ndk_api = 21
 android.api = 33
 android.minapi = 21
 
-# 🔒 Python 3.14 को रोकने के लिए p4a को 3.11.9 पर लॉक करना
-p4a.extra_args = --python-version=3.11.9
+# 🛑 [THE REAL CRITICAL FIX] Force p4a recipe to build Python 3.11 explicitly
+p4a.extra_args = --requirements=python3==3.11.9,kivy==2.3.0
 
 # Gradle & Ads Setup
 android.gradle_dependencies = 'com.google.android.gms:play-services-ads:22.6.0'
