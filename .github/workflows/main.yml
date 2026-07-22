@@ -22,13 +22,14 @@ jobs:
         sudo apt-get install -y git zip unzip colordiff libstdc++6 python3-pip build-essential libltdl-dev libffi-dev libssl-dev openjdk-17-jdk
         echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
 
-    - name: Install Stable Buildozer & P4A (Release Tag)
+    - name: Install Strict Cython 0.29 & Buildozer
       run: |
         python -m pip install --upgrade pip
-        pip install "cython<3.0.0" virtualenv
+        # 🔒 Cython 0.29.33 ही Kivy C-extensions को बिना क्रैश के कम्पाइल करता है
+        pip install "cython==0.29.33" virtualenv
         pip install buildozer
-        # 🔒 Python 3.14 बग से बचने के लिए p4a का स्टेबल रिलीज़ वर्ज़न इंस्टॉल कर रहे हैं
-        pip install python-for-android==2024.1.21
+        # 🔒 Python 3.14 वाले बग से बचने के लिए P4A की स्टेबल Git रिलीज
+        pip install git+https://github.com/kivy/python-for-android.git@v2024.01.21
 
     - name: Fix Android SDK Tools Path Bug
       run: |
@@ -40,14 +41,14 @@ jobs:
         fi
         yes | sdkmanager --licenses || true
 
-    - name: Purge Cache & Execute Build
+    - name: Purge Python 3.14 Cache & Build APK
       run: |
         export ANDROID_HOME=/usr/local/lib/android/sdk
         unset ANDROID_NDK
         unset ANDROID_NDK_HOME
         unset ANDROID_NDK_ROOT
         
-        # 💣 पुराना सारा कैशे साफ़ करना
+        # 💣 पुराना Python 3.14 और Cython 3.0 का कैशे साफ़ करना
         rm -rf .buildozer/
         rm -rf ~/.buildozer/
         
