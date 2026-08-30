@@ -10,10 +10,10 @@ from kivy.utils import platform
 # 1. ADMOB CONFIGURATION (APNI REAL IDs REPLACE KAREIN)
 # ==========================================
 # Android Logo wali ID (~ symbol)
-ADMOB_APP_ID = "ca-app-pub-3940256099942544~3347511713" 
+ADMOB_APP_ID = "ca-app-pub-7837258792747147~6152837151" 
 
 # Interstitial Logo wali ID (/ symbol)
-ADMOB_INTERSTITIAL_ID = "ca-app-pub-3940256099942544/1033173712" 
+ADMOB_INTERSTITIAL_ID = "ca-app-pub-7837258792747147/3899525554" 
 
 
 # ==========================================
