@@ -13,39 +13,12 @@ package.domain = org.test
 source.dir = .
 
 # (list) Source files to include (let empty to include all the files)
-source.include_exts = py,png,jpg,kv,atlas
-
-# (str) Application versioning (method 1)
-version = 0.1
-
-# (list) Application requirements
-GitHub par automated build chalane ke liye exact aur optimized `buildozer.spec` ka code niche diya gaya hai. 
-
-Apni GitHub repository ke root folder mein **`buildozer.spec`** naam ki file banayein aur is code ko paste kar dein:
-
-```ini
-[app]
-
-# (str) Title of your application
-title = QuizNova
-
-# (str) Package name
-package.name = quiznova
-
-# (str) Package domain (needed for android/ios packaging)
-package.domain = org.test
-
-# (str) Source code where the main.py live
-source.dir = .
-
-# (list) Source files to include (let empty to include all the files)
 source.include_exts = py,png,jpg,kv,atlas,json
 
 # (str) Application versioning
 version = 0.1
 
 # (list) Application requirements
-# KivMob GitHub Actions workflow me automatically pyjnius ke sath manage ho jata hai
 requirements = python3,kivy==2.2.1,pyjnius
 
 # (str) Supported orientations
@@ -72,13 +45,12 @@ android.archs = arm64-v8a
 # (bool) Accept SDK license automatically
 android.accept_sdk_license = True
 
-# (list) AdMob Application ID Metadata
-android.meta_data = com.google.android.gms.ads.APPLICATION_ID=ca-app-pub-3940256099942544~3347511713
-
+# (list) AdMob Application ID Metadata (APNI APP ID REPLACE KAREIN)
+android.meta_data = "ca-app-pub-7837258792747147/3899525554"
 [buildozer]
 
-# (int) Log level (0 = error only, 1 = info, 2 = debug (with command output))
+# (int) Log level (0 = error only, 1 = info, 2 = debug)
 log_level = 2
 
-# (int) Display warning if buildozer is run as root (0 = disable, 1 = enable)
+# (int) Display warning if buildozer is run as root
 warn_on_root = 1
